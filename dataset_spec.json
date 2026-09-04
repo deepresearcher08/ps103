@@ -1,0 +1,84 @@
+{
+  "dataset_metadata": {
+    "name": "MoSPI_Infrastructure_Projects_Synthetic_v1",
+    "total_records": 10000,
+    "random_seed": 42,
+    "target_variables": ["delay_months", "risk_level"]
+  },
+  "fields": {
+    "project_id": {"type": "string", "pattern": "PRJ-IN-2026-{id:04d}"},
+    "sector": {
+      "type": "categorical",
+      "options": ["Highways", "Railways", "Power & Energy", "Urban Metro", "Water Resources", "Ports & Shipping"],
+      "weights": [0.30, 0.25, 0.20, 0.10, 0.10, 0.05]
+    },
+    "state_region": {
+      "type": "categorical",
+      "options": ["North", "South", "East", "West", "North-East"],
+      "weights": [0.20, 0.20, 0.20, 0.20, 0.20]
+    },
+    "executing_agency": {
+      "type": "categorical",
+      "options": ["NHAI", "Railways", "NTPC", "DMRC", "PWD", "CWD"],
+      "weighted_by": "sector"
+    },
+    "start_date": {"type": "date", "min": "2018-01-01", "max": "2025-12-31", "distribution": "uniform"},
+    "original_completion_date": {"type": "date", "distribution": "normal_duration", "duration_mean_months": 36, "duration_std_months": 12, "duration_min_months": 12, "duration_max_months": 72},
+    "original_budget_cr": {"type": "float", "distribution": "lognormal", "mean": 5.5, "sigma": 1.2, "min": 50.0, "max": 15000.0},
+    "revised_budget_cr": {
+      "type": "float",
+      "distribution": "cost_overrun",
+      "calibration_basis": "real MoSPI Flash Report (~25% of projects overrun; overall COR ~20%; right-skewed tail up to 100%+; ~1-2% descoping to below-original)",
+      "prob_overrun": 0.25,
+      "overrun_cor_pct": {"distribution": "exponential_bounded", "mean_cor_pct": 25.0, "min_cor_pct": 1.0, "max_cor_pct": 120.0},
+      "prob_descope": 0.02,
+      "descope_pct": {"min": -30.0, "max": -1.0}
+    },
+    "expenditure_todate_cr": {"type": "float", "distribution": "beta", "alpha": 2.0, "beta": 2.0, "max": "revised_budget_cr"},
+    "physical_progress_pct": {"type": "float", "distribution": "uniform", "min": 0.0, "max": 100.0},
+    "financial_progress_pct": {"type": "float", "distribution": "derived", "formula": "expenditure_todate / revised_budget * 100"},
+    "land_acquisition_pct": {"type": "float", "distribution": "beta", "alpha": 5.0, "beta": 2.0, "scale": 100.0},
+    "env_clearance_status": {
+      "type": "categorical",
+      "options": ["Cleared", "In-Review", "Pending"],
+      "weights": [0.75, 0.15, 0.10]
+    },
+    "litigation_active": {"type": "boolean", "probability_true": 0.15},
+    "contractor_tier": {
+      "type": "categorical",
+      "options": ["Tier 1", "Tier 2", "Tier 3"],
+      "weights": [0.50, 0.35, 0.15]
+    },
+    "geo_latitude": {"type": "float", "distribution": "uniform", "min": 8.4, "max": 35.5},
+    "geo_longitude": {"type": "float", "distribution": "uniform", "min": 68.7, "max": 97.2}
+  },
+  "delay_calculation_weights": {
+    "calibration_basis": "real MoSPI Flash Reports: ~40-45% of projects delayed; avg delay ~36 months among delayed; delay brackets 1-12 (202), 13-24 (181), 25-60 (277), >60 (119); reasons = land acquisition, env/forest clearance, litigation, contractor, financing (+COVID).",
+    "base_noise_std": 12.0,
+    "unexplained_risk_month_abs": 18.0,
+    "interaction_penalty_scale": 0.6,
+    "penalties_in_months": {
+      "land_acquisition_below_50pct": 18,
+      "land_acquisition_below_80pct": 8,
+      "env_clearance_pending": 12,
+      "env_clearance_in_review": 4,
+      "active_litigation_true": 24,
+      "contractor_tier_3": 10,
+      "contractor_tier_2": 3,
+      "region_northeast": 6
+    }
+  },
+  "risk_thresholds": {
+    "Critical": {"min_delay_months": 24, "min_cost_overrun_pct": 40.0},
+    "High Risk": {"min_delay_months": 12, "min_cost_overrun_pct": 20.0},
+    "Medium Risk": {"min_delay_months": 4, "min_cost_overrun_pct": 5.0},
+    "Low Risk": {"min_delay_months": 0, "min_cost_overrun_pct": 0.0}
+  },
+  "validation_rules": {
+    "chronology": "start_date < original_completion_date < revised_completion_date",
+    "cost_overrun_linkage_zero_delay": "revised_budget_cr == original_budget_cr when delay_months == 0",
+    "cost_overrun_linkage_high_delay": "revised_budget_cr >= 1.15 * original_budget_cr when delay_months > 12",
+    "physical_financial_gap": "financial_progress_pct <= physical_progress_pct + 25",
+    "land_constraint": "land_acquisition_pct > 75 when physical_progress_pct > 60"
+  }
+}

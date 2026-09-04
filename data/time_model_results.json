@@ -1,0 +1,30 @@
+{
+  "n_rows": 1878,
+  "delayed_rate": 0.6496272630457934,
+  "delayed_class_auc": {
+    "Logistic Regression": 0.901470119793859,
+    "Random Forest": 0.9583385949344528,
+    "LightGBM": 0.9663353161511246
+  },
+  "delayed_class_auc_content_only": {
+    "Logistic Regression": 0.8693575964247658,
+    "Random Forest": 0.9093999689044112,
+    "LightGBM": 0.901447935745896
+  },
+  "per_sector_delayed_auc": {
+    "ROAD TRANSPORT AND HIGHWAYS": 0.889,
+    "RAILWAYS": 0.972,
+    "PETROLEUM": 0.953,
+    "COAL": 0.761
+  },
+  "tor_reg_mae_months": {
+    "Linear Regression": 34.38000739795452,
+    "Random Forest": 14.852053227254922,
+    "LightGBM": 13.964460376118177
+  },
+  "tor_reg_r2_log": {
+    "Linear Regression": 0.19949599194810302,
+    "Random Forest": 0.5847478454516988,
+    "LightGBM": 0.6148721640229475
+  }
+}

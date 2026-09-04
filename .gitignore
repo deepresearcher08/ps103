@@ -1,0 +1,29 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Local run logs
+d_err.txt
+d_out.txt
+sb_err.txt
+sb_err2.txt
+sb_out.txt
+sb_out2.txt
+start_err.txt
+start_out.txt
+*.log
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS
+.DS_Store
+Thumbs.db

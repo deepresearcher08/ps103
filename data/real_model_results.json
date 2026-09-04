@@ -1,0 +1,16 @@
+{
+  "n_rows": 1215,
+  "base_rate": 0.49135802469135803,
+  "model_auc": {
+    "Logistic Regression (baseline)": 0.8509999276395582,
+    "Random Forest": 0.806017527388611,
+    "LightGBM": 0.7821935755681764
+  },
+  "stack_auc": 0.8489122223764932,
+  "per_sector": {
+    "ROAD TRANSPORT AND HIGHWAYS": 0.702,
+    "RAILWAYS": 0.783,
+    "COAL": 0.646,
+    "PETROLEUM": 0.818
+  }
+}
