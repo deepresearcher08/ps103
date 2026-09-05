@@ -127,12 +127,6 @@ def build_explanation(feat: dict, cause: str, is_time: bool) -> str:
     return " ".join(lines)
 
 
-def _num(out, count):
-    out["instruction"] = "Explain the risk of the following infrastructure project in 2-3 sentences."
-    out["input"] = json.dumps(feat, sort_keys=True)
-    out["output"] = _
-
-
 def generate(n_per_source: int = 2000, out_path: Path | None = None) -> list[dict]:
     cost = pd.read_csv(COST)
     time = pd.read_csv(TIME)

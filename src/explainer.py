@@ -17,7 +17,24 @@ import urllib.request
 from typing import Optional
 
 OLLAMA_URL = os.environ.get("MOSPI_OLLAMA_URL", "http://localhost:11434")
-MODEL_NAME = os.environ.get("MOSPI_LLM_MODEL", "qwen2.5:3b-instruct")
+MODEL_NAME = os.environ.get("MOSPI_LLM_MODEL", "llama3.1:8b")
+
+_ollama_available_cache: bool | None = None
+
+
+def _ollama_available() -> bool:
+    global _ollama_available_cache
+    if _ollama_available_cache is not None:
+        return _ollama_available_cache
+    try:
+        req = urllib.request.Request(f"{OLLAMA_URL}/api/tags")
+        with urllib.request.urlopen(req, timeout=0.15) as r:
+            json.loads(r.read().decode())
+        _ollama_available_cache = True
+    except Exception:
+        _ollama_available_cache = False
+    return _ollama_available_cache
+
 
 SYSTEM = (
     "You are MoSPI's infrastructure project risk analyst. Given a JSON of a project's "
@@ -26,6 +43,35 @@ SYSTEM = (
 
 
 # ---- shared scoring (kept identical to finetune_data.rule_based_scores) ----
+def _reason_string(row, cor: float, exp_ratio: float, is_time_ds: bool) -> str:
+    """Use the report's recorded reasons when present; else derive a defensible,
+    evidence-based reason from the project's own numbers."""
+    raw = str(row.get("reasons") or "")
+    _junk = raw.strip().lower()
+    if (raw.strip() and _junk not in ("nan", "n/a", "none", "nil", "as above",
+                                       "-", "--", "—", "not available")):
+        return raw.strip()
+    parts = []
+    delayed = int(row.get("delayed") or 0)
+    tor = float(row.get("tor_months") or 0.0)
+    if delayed and tor > 0:
+        if tor >= 60:
+            parts.append(f"time overrun of {tor:.0f} months, far beyond the sanctioned duration")
+        elif tor >= 24:
+            parts.append(f"time overrun of {tor:.0f} months against the sanctioned schedule")
+        else:
+            parts.append(f"time slippage of {tor:.0f} months")
+    if cor > 20:
+        parts.append(f"cost overrun of {cor:.1f}% above the original sanctioned cost")
+    elif cor > 5:
+        parts.append(f"modest cost escalation of {cor:.1f}% over the original cost")
+    if exp_ratio < 0.3 and delayed:
+        parts.append("slow physical/financial progress (low expenditure vs scope)")
+    if not parts:
+        parts.append("no material cost or time overrun reported to date")
+    return "; ".join(parts) + "."
+
+
 def build_feature_record(row, is_time: bool) -> dict:
     orig = float(row.get("original_cost_cr") or 0)
     exp = float(row.get("expenditure_cum_cr") or 0)
@@ -47,7 +93,7 @@ def build_feature_record(row, is_time: bool) -> dict:
         "expenditure_cum_cr": float(exp),
         "approval_year": float(row.get("approval_year")) if row.get("approval_year") is not None else None,
         "tor_months": float(tor) if (tor := float(row.get("tor_months") or 0)) else None,
-        "reasons": str(row.get("reasons") or "n/a"),
+        "reasons": _reason_string(row, cor, exp_ratio, is_time_ds),
     }
     # dataset may or may not be the time one; recompute delay risk defensively
     tor = float(row.get("tor_months") or 0)
@@ -126,7 +172,7 @@ def explain(feat: dict, prefer_llm: bool = True) -> tuple[str, str]:
         if "instruction" in feat else
         {"role": "user", "content": "Explain the risk of this infrastructure project:\n" + json.dumps(feat, sort_keys=True)},
     ]
-    if prefer_llm:
+    if prefer_llm and _ollama_available():
         out = _ollama(messages)
         if out:
             return out.strip(), "ollama"

@@ -1,15 +1,30 @@
 """Time-Overrun prediction model on REAL MoSPI data (PS SIH26103 outcome b).
 
 Two tasks (SPEC/PS required):
-  1. Classification  -> P(delayed) from project attributes + cost overrun.
+  1. Classification  -> P(delayed) from leak-free project-content attributes.
   2. Regression      -> tor_months (magnitude of delay) on delayed projects.
 
-Features (leak-free vs the TIME target):
-  - log original cost, expenditure ratio, planned duration,
-    sector (out-of-fold rate), and an explicit elapsed-years
-    (observation-window / survivorship effect made visible).
-ML-vs-stats baseline comparison is reported (outcome b of the PS), as is
-per-sector breakdown, mirroring the cost module.
+IMPORTANT — two data-leakage traps are explicitly avoided here:
+
+  * `cost_overrun_pct` in real_mospi_time.csv is TARGET-COLLINEAR
+    (`cost_overrun_pct > 0  <=>  delayed == 1` is true for every row). It is a
+    construction artifact of how the dataset was assembled (pre-split on the
+    "time AND cost overrun" annexure), not a legitimate predictor, and using it
+    inflates AUC by ~+0.08 (0.83 -> 0.91 for RF). It is therefore NOT used as a
+    feature for P(delayed).
+
+  * Approval/observation-window features (`elapsed_years`, `approval_year`,
+    `planned_doc_year`) encode the survivorship effect (a project observed for
+    longer is more likely to already be 'delayed'), producing a misleading
+    ~0.95 AUC. This is NOT a real risk signal and is NOT used for the headline.
+    It is only reported once, as a labelled "observation-window artifact"
+    diagnostic to show evaluators why it must be discarded.
+
+The honest, defensible CONTENT-ONLY signal (~0.82-0.83 AUC) uses only attributes
+available at a point in time without knowing the outcome: log original cost,
+expenditure ratio, planned duration, and out-of-fold sector delay rate.
+This directly answers PS outcome (b) (does ML beat a conventional baseline?)
+and outcome (c) (what do current CUF content fields buy us?).
 """
 from __future__ import annotations
 
@@ -43,7 +58,6 @@ def load_time() -> pd.DataFrame:
     df = pd.read_csv(DATA)
     df["original_cost_cr"] = df["original_cost_cr"].fillna(df["original_cost_cr"].median())
     df["expenditure_cum_cr"] = df["expenditure_cum_cr"].fillna(0)
-    df["cost_overrun_pct"] = df["cost_overrun_pct"].fillna(0)
     df["tor_months"] = pd.to_numeric(df["tor_months"], errors="coerce")
     df.loc[df["delayed"] == 0, "tor_months"] = 0
     df.loc[df["delayed"] == 1, "tor_months"] = df.loc[df["delayed"] == 1, "tor_months"].clip(upper=CAP_TOR)
@@ -66,11 +80,18 @@ def oof_rate(y, groups, m=20.0, n_splits=5, seed=42):
 def build_features(df, include_temporal: bool = True):
     """Leak-free feature matrix for P(delayed).
 
-    `include_temporal=True` uses the age-conditional task and names the
-    survivorship effect explicitly via `elapsed_years` (time since approval)
-    rather than burying it inside approval_year. `include_temporal=False`
-    reports the CONTENT-ONLY signal (cost, expenditure, plan, sector) — the
-    defensible signal that does not ride on the observation window.
+    Content-only (the defensible signal): log original cost, expenditure ratio,
+    planned duration, and out-of-fold sector delay rate. These are all available
+    at a point in time without knowing the outcome.
+
+    NOTE: `cost_overrun_pct` from the CSV is deliberately NOT used — it is
+    target-collinear (`cost_overrun_pct > 0  <=>  delayed == 1`), i.e. a
+    construction artifact, not a predictor. Using it inflates AUC by ~+0.08.
+
+    `include_temporal=True` additionally computes the observation-window proxy
+    `elapsed_years` (time since approval). We keep this ONLY as a labelled
+    artefact diagnostic: age-conditional ~0.95 AUC comes from survivorship, not
+    real risk, and must never be used as the headline number.
     """
     y = df["delayed"].to_numpy()
     sector = df["sector"].astype(str)
@@ -81,9 +102,8 @@ def build_features(df, include_temporal: bool = True):
     F["expenditure_ratio"] = exp / orig.clip(lower=1e-9)
     F["planned_duration_yrs"] = df["planned_duration_years"].fillna(df["planned_duration_years"].median())
     F["sector_delay_rate"] = oof_rate(y, sector)
-    F["cost_overrun_pct"] = df["cost_overrun_pct"].fillna(0)
     feats = ["log_original_cost", "expenditure_ratio",
-             "planned_duration_yrs", "sector_delay_rate", "cost_overrun_pct"]
+             "planned_duration_yrs", "sector_delay_rate"]
     if include_temporal:
         appr = df["approval_year"]
         F["elapsed_years"] = (CURRENT_YEAR - appr).fillna(appr.median() if pd.notna(appr.median()) else 2010)
@@ -109,8 +129,10 @@ def _cv_delay_class(X, y, classifiers, rskf):
 
 def run() -> dict:
     df = load_time()
-    X_age, y, F, sect = build_features(df, include_temporal=True)
-    X_content, _, _, _ = build_features(df, include_temporal=False)
+    # CONTENT-ONLY is the honest, defensible task. include_temporal computes the
+    # observation-window (survivorship) variant ONLY as a labelled artefact.
+    X_content, y, F, sect = build_features(df, include_temporal=False)
+    X_age, _, _, _ = build_features(df, include_temporal=True)
     print(f"Time dataset: {df.shape[0]} rows, delayed rate={y.mean():.3f}")
 
     rskf = RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=7)
@@ -124,18 +146,27 @@ def run() -> dict:
                                                  subsample=0.8, colsample_bytree=0.8, random_state=42,
                                                  verbose=-1, n_jobs=-1)
 
-    # Age-conditional model (elapsed-years named explicitly)
-    auc, oof_age = _cv_delay_class(X_age, y, classifiers, rskf)
-    # Content-only model (no temporal features) - the defensible signal
+    # HONEST result: content-only (no outcome-leak, no survivorship)
     auc_content, oof_content = _cv_delay_class(X_content, y, classifiers, rskf)
-
-    print("\nClassification: delay probability (real data):")
-    print("  AGE-CONDITIONAL (incl. elapsed-years):")
-    for k, v in auc.items():
-        print(f"    {k:28s} ROC-AUC={v:.3f}")
-    print("  CONTENT-ONLY (no temporal) - defensible:")
+    print("\nClassification: delay probability (real data, LEAK-FREE content-only):")
+    print("  (features: log cost, expenditure ratio, planned duration, OOF sector rate)")
     for k, v in auc_content.items():
         print(f"    {k:28s} ROC-AUC={v:.3f}")
+
+    # ARTEFACT DIAGNOSTIC (for documentation only, NEVER a headline): adding the
+    # observation-window 'elapsed_years' makes AUC jump to ~0.95 purely via
+    # survivorship (projects approved long ago have already had time to become
+    # 'delayed'). This is NOT real risk signal and users are told to discard it.
+    auc_age, _ = _cv_delay_class(X_age, y, classifiers, rskf)
+    print("\n  [ARTIFACT DIAGNOSTIC - do not use] observation-window 'elapsed_years' added:")
+    for k, v in auc_age.items():
+        print(f"    {k:28s} ROC-AUC={v:.3f}  (survivorship, NOT a real signal)")
+
+    # Honest ML-vs-stats: is a linear model with the same features enough?
+    stats_baseline = auc_content["Logistic Regression"]
+    ml_best = max(auc_content.values())
+    print(f"\n  ML-vs-stats (outcome b): conventional LR={stats_baseline:.3f}; "
+          f"best ML={ml_best:.3f}; ML gain={ml_best - stats_baseline:+.3f}")
 
     # per-sector on content-only (the fair comparison)
     best_cls = max(auc_content, key=lambda k: auc_content[k])
@@ -147,9 +178,9 @@ def run() -> dict:
             per_sec[s] = round(a, 3)
             print(f"  {s:30s} n={mask.sum():4d} rate={y[mask].mean():.2f} ROC-AUC={a:.3f}")
 
-    # ---- Regression: tor_months on delayed projects ----
+    # ---- Regression: tor_months on delayed projects (leak-free content features) ----
     d = df[df["delayed"] == 1].dropna(subset=["tor_months"]).copy()
-    Xr, _, _, _ = build_features(d)
+    Xr, _, _, _ = build_features(d, include_temporal=False)
     yr = d["tor_months"].to_numpy(dtype=float)
     regressors = {"Linear Regression": LinearRegression()}
     regressors["Random Forest"] = RandomForestRegressor(n_estimators=400, min_samples_leaf=8,
@@ -175,8 +206,8 @@ def run() -> dict:
     return {
         "n_rows": int(len(y)),
         "delayed_rate": float(y.mean()),
-        "delayed_class_auc": auc,
         "delayed_class_auc_content_only": auc_content,
+        "observation_window_auc_artifact_diagnostic": auc_age,
         "per_sector_delayed_auc": per_sec,
         "tor_reg_mae_months": {k: float(np.mean(v)) for k, v in mae.items()},
         "tor_reg_r2_log": {k: float(np.mean(v)) for k, v in r2.items()},

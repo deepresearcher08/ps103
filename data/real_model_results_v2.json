@@ -1,17 +1,17 @@
 {
-  "n_rows": 1215,
-  "base_rate": 0.49135802469135803,
+  "n_rows": 1213,
+  "base_rate": 0.49134377576257215,
   "model_auc": {
-    "Logistic Regression": 0.8548950874606334,
-    "Random Forest": 0.8471942275467754,
-    "LightGBM": 0.8236678754900859
+    "Logistic Regression": 0.8523489696166953,
+    "Random Forest": 0.8456834517179544,
+    "LightGBM": 0.8241667667591557
   },
-  "stack_auc": 0.8562129960822515,
-  "vote_auc": 0.8513785187560469,
+  "stack_auc": 0.8552780422423363,
+  "vote_auc": 0.8491519530707642,
   "per_sector": {
-    "ROAD TRANSPORT AND HIGHWAYS": 0.751,
-    "RAILWAYS": 0.826,
-    "COAL": 0.633,
-    "PETROLEUM": 0.89
+    "ROAD TRANSPORT AND HIGHWAYS": 0.762,
+    "RAILWAYS": 0.808,
+    "COAL": 0.624,
+    "PETROLEUM": 0.879
   }
 }

@@ -1,30 +1,30 @@
 {
-  "n_rows": 1878,
-  "delayed_rate": 0.6496272630457934,
-  "delayed_class_auc": {
-    "Logistic Regression": 0.901470119793859,
-    "Random Forest": 0.9583385949344528,
-    "LightGBM": 0.9663353161511246
-  },
+  "n_rows": 1876,
+  "delayed_rate": 0.6497867803837953,
   "delayed_class_auc_content_only": {
-    "Logistic Regression": 0.8693575964247658,
-    "Random Forest": 0.9093999689044112,
-    "LightGBM": 0.901447935745896
+    "Logistic Regression": 0.8057235734235496,
+    "Random Forest": 0.8284630150054708,
+    "LightGBM": 0.8186991202996188
+  },
+  "observation_window_auc_artifact_diagnostic": {
+    "Logistic Regression": 0.820610011498314,
+    "Random Forest": 0.9267286039223045,
+    "LightGBM": 0.9437432377316426
   },
   "per_sector_delayed_auc": {
-    "ROAD TRANSPORT AND HIGHWAYS": 0.889,
-    "RAILWAYS": 0.972,
-    "PETROLEUM": 0.953,
-    "COAL": 0.761
+    "ROAD TRANSPORT AND HIGHWAYS": 0.793,
+    "RAILWAYS": 0.881,
+    "PETROLEUM": 0.881,
+    "COAL": 0.723
   },
   "tor_reg_mae_months": {
-    "Linear Regression": 34.38000739795452,
-    "Random Forest": 14.852053227254922,
-    "LightGBM": 13.964460376118177
+    "Linear Regression": 29.594971449854018,
+    "Random Forest": 21.32668706121973,
+    "LightGBM": 22.162723452482812
   },
   "tor_reg_r2_log": {
-    "Linear Regression": 0.19949599194810302,
-    "Random Forest": 0.5847478454516988,
-    "LightGBM": 0.6148721640229475
+    "Linear Regression": 0.1808052173755393,
+    "Random Forest": 0.2844542318728457,
+    "LightGBM": 0.2284358667272069
   }
 }

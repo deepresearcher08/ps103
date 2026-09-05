@@ -1,0 +1,227 @@
+{
+  "method": "EXTERNAL holdout: train on the pre-2020 annexure dataset (<= cutoff); test on the May-2025 Flash Report's projects approved in the following 2 years \u2014 a genuinely different document, new format, labels RESOLVED (no censoring on those cohorts).",
+  "data": {
+    "train": "C:\\Users\\soumy\\OneDrive\\Desktop\\PS103\\data\\real_mospi_projects.csv",
+    "external_test": "C:\\Users\\soumy\\OneDrive\\Desktop\\PS103\\data\\mospi_may2025_projects.csv"
+  },
+  "results": {
+    "cutoff_2017": {
+      "cutoff": 2017,
+      "test_window": "2018-2019",
+      "source_note": "test = May-2025 Flash Report cohort, labels resolved (no label censoring), format: train annexure <= cutoff",
+      "cost": {
+        "n_train": 229,
+        "n_test": 207,
+        "clf": {
+          "auc_by_model": {
+            "Logistic Regression": 0.64,
+            "Random Forest": 0.597,
+            "LightGBM": 0.587
+          },
+          "best": "Logistic Regression",
+          "auc": 0.64,
+          "test_base_rate": 0.353,
+          "thr@0.5": {
+            "flagged": 205,
+            "precision": 0.356,
+            "recall": 1.0
+          },
+          "top20pct": {
+            "top_pct": 0.2,
+            "recall@top": 0.37,
+            "lift": 1.85
+          }
+        },
+        "reg": {
+          "best": "Random Forest",
+          "mae": 0.273,
+          "mae_by_model": {
+            "Linear Regression": 0.393,
+            "Random Forest": 0.273,
+            "LightGBM": 0.292
+          },
+          "naive_median_mae": 0.31,
+          "improvement_vs_naive_pct": 12.0
+        }
+      },
+      "time": {
+        "n_train": 455,
+        "n_test": 196,
+        "clf": {
+          "auc_by_model": {
+            "Logistic Regression": 0.704,
+            "Random Forest": 0.776,
+            "LightGBM": 0.806
+          },
+          "best": "LightGBM",
+          "auc": 0.806,
+          "test_base_rate": 0.821,
+          "thr@0.5": {
+            "flagged": 189,
+            "precision": 0.841,
+            "recall": 0.988
+          },
+          "top20pct": {
+            "top_pct": 0.2,
+            "recall@top": 0.236,
+            "lift": 1.18
+          }
+        },
+        "reg": {
+          "best": "Random Forest",
+          "mae_months": 16.8,
+          "naive_median_mae": 23.7,
+          "improvement_vs_naive_pct": 29.0,
+          "test_n_delayed": 161
+        }
+      }
+    },
+    "cutoff_2018": {
+      "cutoff": 2018,
+      "test_window": "2019-2020",
+      "source_note": "test = May-2025 Flash Report cohort, labels resolved (no label censoring), format: train annexure <= cutoff",
+      "cost": {
+        "n_train": 287,
+        "n_test": 288,
+        "clf": {
+          "auc_by_model": {
+            "Logistic Regression": 0.719,
+            "Random Forest": 0.686,
+            "LightGBM": 0.675
+          },
+          "best": "Logistic Regression",
+          "auc": 0.719,
+          "test_base_rate": 0.319,
+          "thr@0.5": {
+            "flagged": 287,
+            "precision": 0.321,
+            "recall": 1.0
+          },
+          "top20pct": {
+            "top_pct": 0.2,
+            "recall@top": 0.446,
+            "lift": 2.23
+          }
+        },
+        "reg": {
+          "best": "Random Forest",
+          "mae": 0.217,
+          "mae_by_model": {
+            "Linear Regression": 0.244,
+            "Random Forest": 0.217,
+            "LightGBM": 0.235
+          },
+          "naive_median_mae": 0.262,
+          "improvement_vs_naive_pct": 17.2
+        }
+      },
+      "time": {
+        "n_train": 590,
+        "n_test": 244,
+        "clf": {
+          "auc_by_model": {
+            "Logistic Regression": 0.784,
+            "Random Forest": 0.81,
+            "LightGBM": 0.755
+          },
+          "best": "Random Forest",
+          "auc": 0.81,
+          "test_base_rate": 0.828,
+          "thr@0.5": {
+            "flagged": 238,
+            "precision": 0.845,
+            "recall": 0.995
+          },
+          "top20pct": {
+            "top_pct": 0.2,
+            "recall@top": 0.228,
+            "lift": 1.14
+          }
+        },
+        "reg": {
+          "best": "Linear Regression",
+          "mae_months": 16.2,
+          "naive_median_mae": 23.1,
+          "improvement_vs_naive_pct": 29.8,
+          "test_n_delayed": 202
+        }
+      }
+    },
+    "cutoff_2019": {
+      "cutoff": 2019,
+      "test_window": "2020-2021",
+      "source_note": "test = May-2025 Flash Report cohort, labels resolved (no label censoring), format: train annexure <= cutoff",
+      "cost": {
+        "n_train": 351,
+        "n_test": 450,
+        "clf": {
+          "auc_by_model": {
+            "Logistic Regression": 0.665,
+            "Random Forest": 0.635,
+            "LightGBM": 0.609
+          },
+          "best": "Logistic Regression",
+          "auc": 0.665,
+          "test_base_rate": 0.247,
+          "thr@0.5": {
+            "flagged": 422,
+            "precision": 0.244,
+            "recall": 0.928
+          },
+          "top20pct": {
+            "top_pct": 0.2,
+            "recall@top": 0.432,
+            "lift": 2.16
+          }
+        },
+        "reg": {
+          "best": "LightGBM",
+          "mae": 0.193,
+          "mae_by_model": {
+            "Linear Regression": 0.197,
+            "Random Forest": 0.208,
+            "LightGBM": 0.193
+          },
+          "naive_median_mae": 0.203,
+          "improvement_vs_naive_pct": 4.9
+        }
+      },
+      "time": {
+        "n_train": 733,
+        "n_test": 364,
+        "clf": {
+          "auc_by_model": {
+            "Logistic Regression": 0.74,
+            "Random Forest": 0.732,
+            "LightGBM": 0.692
+          },
+          "best": "Logistic Regression",
+          "auc": 0.74,
+          "test_base_rate": 0.799,
+          "thr@0.5": {
+            "flagged": 364,
+            "precision": 0.799,
+            "recall": 1.0
+          },
+          "top20pct": {
+            "top_pct": 0.2,
+            "recall@top": 0.234,
+            "lift": 1.17
+          }
+        },
+        "reg": {
+          "best": "Linear Regression",
+          "mae_months": 15.1,
+          "naive_median_mae": 23.1,
+          "improvement_vs_naive_pct": 34.5,
+          "test_n_delayed": 291
+        }
+      }
+    }
+  },
+  "cutoffs": [
+    2017,
+    2018,
+    2019
+  ]
+}

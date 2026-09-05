@@ -24,6 +24,12 @@ start_out.txt
 # Streamlit
 .streamlit/secrets.toml
 
+# Raw source PDFs (not needed at runtime; committed dataset CSVs are derived)
+data/raw/
+
+# Local scratch / AI session notes (not part of the deliverable)
+SESSION_CONTEXT.md
+
 # OS
 .DS_Store
 Thumbs.db

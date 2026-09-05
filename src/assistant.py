@@ -15,7 +15,7 @@ import re
 
 import pandas as pd
 
-from src.explainer import _ollama, SYSTEM
+from src.explainer import _ollama, SYSTEM, _ollama_available
 
 # tool schemas for Ollama function-calling (supported by llama3.1+/qwen2.5 tool models)
 TOOLS = [
@@ -111,8 +111,9 @@ def tool_search(ctx, args):
     mask = view[col].astype(str).str.lower().str.contains(kw, na=False)
     sub = view[mask]
     if args.get("list"):
+        limit = min(int(args.get("limit") or 10), 50)
         df = sub[["project_name", "sector", "cost_risk", "delay_risk", "cost_overrun_pct"]]\
-            .head(int(args.get("limit", 10)))
+            .head(limit)
         return (f"{len(sub)} project(s) match '{kw}'.", df)
     return (f"There are **{len(sub)}** projects matching '{kw}' in {field}.", None)
 
@@ -137,7 +138,7 @@ def tool_sector(ctx, args):
 def tool_top(ctx, args):
     view = ctx["view"].copy()
     view["combined"] = (view["cost_risk"] + view["delay_risk"]) / 2
-    n = int(args.get("n", 10))
+    n = min(int(args.get("n") or 10), 50)
     top = view.nlargest(n, "combined")[["project_name", "sector", "cost_risk",
                                         "delay_risk", "combined"]]
     return (f"Top {n} projects by combined risk:", top)
@@ -155,7 +156,7 @@ def tool_rank(ctx, args):
         view = view[mask]
         if view.empty:
             return (f"No projects match '{kw}'.", None)
-    n = int(args.get("n", 5))
+    n = min(int(args.get("n") or 5), 50)
     ascending = bool(args.get("ascending", False))
     ranked = view.sort_values(metric, ascending=ascending).head(n)
     cols = [c for c in ["project_name", "sector", metric, "cost_risk", "delay_risk",
@@ -234,6 +235,8 @@ def _dispatch(name, args, ctx):
 # ---------------- LLM tool-calling path ----------------
 def _llm_choose_tool(q: str):
     """Ask Ollama to pick a tool + args (JSON). Returns (tool_name, args) or None."""
+    if not _ollama_available():
+        return None
     user = ("You are a data assistant. Given the question, respond ONLY with a JSON object: "
             '{"name": "<tool>", "arguments": {...}} choosing from: '
             "search_projects, sector_stats, top_risk_projects, rank_projects, project_detail, portfolio_overview. "
@@ -242,10 +245,17 @@ def _llm_choose_tool(q: str):
                    {"role": "user", "content": user}], tools=TOOLS)
     if not out:
         return None
-    # try structured tool_calls first, else parse JSON from text
-    if isinstance(out, dict) and out.get("tool_calls"):
-        tc = out["tool_calls"][0]["function"]
-        return tc["name"], json.loads(tc.get("arguments") or "{}")
+    # try structured tool_calls first (Ollama returns them under message.tool_calls),
+    # else parse JSON from text
+    if isinstance(out, dict):
+        tc = (out.get("message") or {}).get("tool_calls") or out.get("tool_calls")
+        if tc:
+            fn = tc[0].get("function") or tc[0]
+            name = fn.get("name")
+            args = fn.get("arguments")
+            if isinstance(args, str):
+                args = json.loads(args)
+            return name, args or {}
     try:
         body = re.search(r"\{.*\}", out, re.S)
         if body:
@@ -302,6 +312,13 @@ def _fallback(q, ctx):
                 return (f"**{n}** project(s) relate to '{kw}'. Showing up to 15:", df)
             return (f"**{n}** project(s) relate to '{kw}' (matched in project name or sector).", None)
         p = ctx["portfolio"]
+        # critical/high-risk counts when the question asks about them
+        if "critical delay" in ql or "high delay" in ql or "delay risk" in ql:
+            return (f"**{p['critical_high_delay']}** projects are in critical/high **delay** "
+                    f"risk (score ≥ 0.45); {p['n']:,} projects monitored in total.", None)
+        if "critical cost" in ql or "high cost" in ql or "cost risk" in ql:
+            return (f"**{p['critical_high_cost']}** projects are in critical/high **cost** "
+                    f"risk (score ≥ 0.45); {p['n']:,} projects monitored in total.", None)
         return f"The portfolio monitors **{p['n']:,}** projects.", None
     if re.search(r"(top|riskiest|worst|at[- ]risk)", ql):
         n = re.search(r"(\d+)", q)
@@ -356,12 +373,27 @@ def answer(q: str, ctx: dict) -> tuple[str, pd.DataFrame | None]:
         name, args = choice
         text, table = _dispatch(name, args, ctx)
         # let the LLM phrase a final answer in prose when possible
-        if table is not None:
+        if table is not None and _ollama_available():
             prose = _ollama([{"role": "system", "content": SYSTEM},
                              {"role": "user", "content":
                               f"The data result is:\n{text}\n{table.head(10).to_string()}\n"
                               f"Answer the user's original question concisely: {q}"}])
             if prose:
                 text = prose
+        # robustness: if the LLM picked a tool that clearly failed (wrong project /
+        # sector / count), re-answer with the deterministic engine so the chat never
+        # returns a dead end.
+        if _looks_like_failure(text):
+            fb_text, fb_table = _fallback(q, ctx)
+            text = f"{text}\n\n---\n*Engine fallback:*\n{fb_text}"
+            table = fb_table
         return text, table
     return _fallback(q, ctx)
+
+
+def _looks_like_failure(text: str) -> bool:
+    """Heuristic: did the dispatched tool end up with no data to show?"""
+    t = (text or "").lower()
+    markers = ("couldn't find", "no sector named", "no project", "unknown metric",
+               "no projects match", "doesn't exist", "top 0 ", "0 project(s)")
+    return any(m in t for m in markers)

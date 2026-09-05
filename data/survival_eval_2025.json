@@ -1,0 +1,148 @@
+{
+  "method": "SURVIVAL reframing of the external holdout: instead of the binary 'delayed' flag, model time-to-delay with right-censoring (discrete-time logistic hazard). Projects not yet flagged delayed are used as censored observations rather than dropped or treated as safe \u2014 this is the fix for the label-censoring that suppressed raw-cohort AUCs.",
+  "target_definition": "event = delayed revealed by a revised DOC; censor = still under observation/on-time at min(planned DOC, May-2025).",
+  "scoring": "Harrell's C-index over all test subjects (censored-aware) + AUC of P(delayed by planned horizon) vs the flag, same cohort as the plain holdout.",
+  "results": {
+    "cutoff_2017": {
+      "cutoff": 2017,
+      "test_window": "2018-2019",
+      "n_train": 455,
+      "n_test": 207,
+      "test_delayed_flag_rate": 0.778,
+      "test_fraction_censored_not_yet_delayed": 0.222,
+      "test_median_followup_months": 77.0,
+      "c_index_survival_incl_censored": 0.59,
+      "c_index_survival_delayed_only": 0.54,
+      "c_index_binary_lr_incl_censored": 0.604,
+      "auc_hazard_at_planned_horizon_vs_flag": 0.303,
+      "auc_binary_lr_same_cohort": 0.658,
+      "baseline_hazard_note": "probability of being flagged delayed within each year since approval"
+    },
+    "cutoff_2018": {
+      "cutoff": 2018,
+      "test_window": "2019-2020",
+      "n_train": 590,
+      "n_test": 288,
+      "test_delayed_flag_rate": 0.701,
+      "test_fraction_censored_not_yet_delayed": 0.299,
+      "test_median_followup_months": 62.0,
+      "c_index_survival_incl_censored": 0.646,
+      "c_index_survival_delayed_only": 0.603,
+      "c_index_binary_lr_incl_censored": 0.629,
+      "auc_hazard_at_planned_horizon_vs_flag": 0.248,
+      "auc_binary_lr_same_cohort": 0.7,
+      "baseline_hazard_note": "probability of being flagged delayed within each year since approval"
+    },
+    "cutoff_2019": {
+      "cutoff": 2019,
+      "test_window": "2020-2021",
+      "n_train": 733,
+      "n_test": 450,
+      "test_delayed_flag_rate": 0.647,
+      "test_fraction_censored_not_yet_delayed": 0.353,
+      "test_median_followup_months": 50.0,
+      "c_index_survival_incl_censored": 0.593,
+      "c_index_survival_delayed_only": 0.543,
+      "c_index_binary_lr_incl_censored": 0.567,
+      "auc_hazard_at_planned_horizon_vs_flag": 0.424,
+      "auc_binary_lr_same_cohort": 0.651,
+      "baseline_hazard_note": "probability of being flagged delayed within each year since approval"
+    },
+    "cutoff_2020": {
+      "cutoff": 2020,
+      "test_window": "2021-2022",
+      "n_train": 971,
+      "n_test": 557,
+      "test_delayed_flag_rate": 0.533,
+      "test_fraction_censored_not_yet_delayed": 0.467,
+      "test_median_followup_months": 38.0,
+      "c_index_survival_incl_censored": 0.639,
+      "c_index_survival_delayed_only": 0.591,
+      "c_index_binary_lr_incl_censored": 0.587,
+      "auc_hazard_at_planned_horizon_vs_flag": 0.295,
+      "auc_binary_lr_same_cohort": 0.662,
+      "baseline_hazard_note": "probability of being flagged delayed within each year since approval"
+    }
+  },
+  "cutoffs": [
+    2017,
+    2018,
+    2019,
+    2020
+  ],
+  "summary": {
+    "c_index_survival_range": [
+      0.59,
+      0.646
+    ],
+    "c_index_binary_range": [
+      0.567,
+      0.629
+    ],
+    "auc_hazard_range": [
+      0.248,
+      0.424
+    ],
+    "sentence": "The survival model stays evaluable (c-index) on cohorts that are mostly still-censored, where a binary classifier's AUC is undefined/garbage."
+  },
+  "baseline_hazard": {
+    "median_project_baseline_hazard": [
+      {
+        "year": 1,
+        "hazard": 0.0081
+      },
+      {
+        "year": 2,
+        "hazard": 0.0103
+      },
+      {
+        "year": 3,
+        "hazard": 0.0122
+      },
+      {
+        "year": 4,
+        "hazard": 0.0331
+      },
+      {
+        "year": 5,
+        "hazard": 0.0341
+      },
+      {
+        "year": 6,
+        "hazard": 0.0351
+      },
+      {
+        "year": 7,
+        "hazard": 0.1064
+      },
+      {
+        "year": 8,
+        "hazard": 0.2627
+      },
+      {
+        "year": 9,
+        "hazard": 0.2218
+      },
+      {
+        "year": 10,
+        "hazard": 0.2456
+      },
+      {
+        "year": 11,
+        "hazard": 0.2181
+      },
+      {
+        "year": 12,
+        "hazard": 0.2684
+      },
+      {
+        "year": 13,
+        "hazard": 0.1943
+      },
+      {
+        "year": 14,
+        "hazard": 0.3836
+      }
+    ]
+  }
+}

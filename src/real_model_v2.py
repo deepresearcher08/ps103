@@ -159,7 +159,6 @@ def run() -> dict:
                 cal.fit(sc.transform(X[tr]), y[tr])
                 p = cal.predict_proba(sc.transform(X[va]))[:, 1]
             else:
-                m.fit(X[tr], y[tr])
                 p = CalibratedClassifierCV(m, cv=3, method="isotonic").fit(X[tr], y[tr])\
                     .predict_proba(X[va])[:, 1]
             oof[k][va] = p

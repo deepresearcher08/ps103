@@ -1,5 +1,14 @@
 # MoSPI Infrastructure Projects — Dataset (Synthetic + Real)
 
+> **Recent additions (start here):** [`KEY_INSIGHT.md`](KEY_INSIGHT.md) — the headline finding
+> (censoring illusion + forward risk ranking) and the estimated savings (~Rs 2.27 lakh cr expected
+> overrun in today's "clean" portfolio; top-20% ranked list carries 75.5%; ~Rs 45,000 cr
+> conservative saving). [`ARCHITECTURE.md`](ARCHITECTURE.md) — current end-to-end architecture,
+> the recent dashboard hardenings (WebGL/OOM fixes, no-arg cached `build_view()`, lazy pydeck,
+> None-safe assistant tools) and the live ops config (`fileWatcherType=none`, `runOnSave=false`).
+> The modeling caveats and experiment history below remain the honest spine of the project's
+> claims.
+
 Two tracks:
 1. **Synthetic generator** (`src/generate_data.py`) — calibrates to real MoSPI Flash Report
    statistics for AB-testing pipelines before real data is available.
@@ -83,45 +92,53 @@ cost-only prototype was missing. Real data from the delay annexures.
 | VII "Delayed Projects" | ~1,220 projects with **Time Overrun (months)** + DOC + reasons | `delayed = 1` |
 | IV "Ahead of Schedule" + V "On Schedule" | ~658 not-delayed projects | `delayed = 0` |
 
-**1,878 real projects**, delayed rate 0.65, real `tor_months` (median 22, right-tailed).
+**1,876 real projects** (after junk-row cleanup), delayed rate 0.65, real `tor_months`
+(median 22, right-tailed). Note: ~126 rows share a `(sector, project_name)` key (the same
+project reported across annexures); these are kept to preserve both observations.
 
 ## Targets & features (`src/time_model.py`)
 
 - **Classification**: P(delayed) — logistic / RF / LightGBM.
 - **Regression**: `tor_months` magnitude on delayed projects (log-transformed).
 - **Leak-free features**: log original cost, expenditure ratio, planned duration (approval →
-  original DOC), out-of-fold sector delay rate, and cost-overrun % (`cost_overrun_pct` — a
-  legitimate execution signal for the *time* target, knowable at evaluation time; verified
-  by ablation, it is a genuine driver, not an annexure-membership leak).
-- **Observation-window caveat (survivorship bias)**: approval cohort year / elapsed time
-  since approval mechanically predicts "delayed" (brand-new projects can't yet be flagged).
-  We therefore report the model two ways (see `feedback.md`):
-  - **Age-conditional** (with `elapsed_years` named explicitly) — dominated by the observation
-    window; **not** the pitch number.
-  - **Content-only** (no temporal features) — the defensible delay signal.
+  original DOC), and out-of-fold sector delay rate.
+- **Dropped as leakage** (audited this session):
+  - `cost_overrun_pct` — **target-collinear**: `cost_overrun_pct > 0 ⟺ delayed == 1` in ~100%
+    of rows (all 657 negatives are exactly 0; it is an annexure-membership artefact, not an
+    execution signal). Using it inflates AUC by ~+0.08 (RF 0.911 → 0.828 honest).
+  - `approval_year` / `elapsed_years` / `planned_doc_year` — **survivorship / observation-window**
+    artefact (~0.95 AUC): brand-new projects can't yet be flagged as delayed, so calendar
+    position mechanically predicts the label. Kept only as `delayed_class_auc_age` and
+    **never used as a headline or feature**.
+- **Observation-window caveat (survivorship bias)**: see above; the **content-only** numbers
+  below are the defensible delay signal.
 
-## Results (repeated 5x2 CV; see `data/time_model_results.json`)
+## Results (repeated CV; see `data/time_model_results.json`)
 
-**Classification — content-only P(delayed) ROC-AUC (defensible):**
-LR **0.87** · Random Forest **0.91** · LightGBM 0.90.
-(Age-conditional framing inflates these to ~0.90–0.97 via the observation window; per
-`feedback.md` that top layer is **not** used on the pitch.)
+**Classification — content-only P(delayed) ROC-AUC (defensible, leak-free):**
+LR **0.806** · Random Forest **0.828** · LightGBM 0.819.
+(Cost-overrun-included = 0.911 and age-conditional = 0.9–0.97 are **inflation artefacts** and
+are NOT pitch numbers. `delayed_class_auc_age` is a diagnostics-only artifact check.)
 
-**Per-sector (content-only, sectors with ≥10 rows & both classes):**
-Railways **0.97** / Petroleum 0.95 / Road 0.89 / Coal 0.76.
+**Honest ML-vs-stats answer:** ML adds only **~+0.02 AUC over logistic regression**
+(RF 0.828 − LR 0.806). On clean features the statistical model is nearly as good — the value
+is in the *features and honest framing*, not in tree ensembles per se.
 
-**Regression log(tor_months) — ML clearly beats the linear baseline:**
+**Regression log(tor_months) — leak-free (no `cost_overrun_pct`):**
 
 | Model | MAE (months) | R² (log) |
 |---|---|---|
-| Linear Regression (baseline) | 34.4 | 0.20 |
-| Random Forest | **14.9** | **0.59** |
-| LightGBM | 14.0 | 0.62 |
+| Linear Regression (baseline) | ~30–34 | ~0.2 |
+| Random Forest | **21.3** | ~0.28 |
+| LightGBM | 22.2 | ~0.28 |
 
-> **Key story for the pitch:** on the *time-overrun magnitude* task, ML gives a real gain
-> over the conventional statistical baseline (~10 months lower MAE). This is a concrete,
-> positive answer to PS dimension (b) — the same comparison that was a wash on the cost
-> task is a clear ML win on the time task.
+Dropping the leaky `cost_overrun_pct` raised honest MAE from ~14–15 mo to ~21–29 mo (that
+"win" was a leak, not signal).
+
+> **Honest framing for the pitch:** on the *cost* task the model is a clear, defensible win
+> (~0.85 clf AUC, ~0.24 reg MAE vs 0.34 naive median). On the *time* delay task the signal is
+> modest (~0.83 AUC, ML ≈ stats +0.02) — used on the dashboard as *hard budget & time
+> estimates* per project, with honest confidence bounds, not as a headline performance claim.
 
 ## Known limits (document these)
 
@@ -129,6 +146,152 @@ Railways **0.97** / Petroleum 0.95 / Road 0.89 / Coal 0.76.
 - `planned_duration` uses approval/original-DOC *years* (month granularity not preserved),
   so it's a coarse but still informative feature.
 - Single May-2024 snapshot; cross-snapshot validation is the recommended follow-up.
+
+## "How good is it on NEW data?" — temporal (out-of-sample) validation
+
+`src/temporal_eval.py` answers the practical question honestly: train **only** on projects
+approved up to a cutoff year, then evaluate **only** on projects approved in the next 2
+years (data the model never saw). Sector encodings are rebuilt from train data only
+(no leakage). Full output: `data/temporal_eval_results.json`.
+
+| Train ≤ | Test (approved) | Time AUC | Cost AUC | Time reg MAE (vs naive) | Cost reg MAE (vs naive) |
+|---|---|---|---|---|---|
+| 2018 | 2019–2020 | **0.802** | **0.712** (n=163, rate 56%) | 20.6 mo (vs 28.9 naive) | 0.227 (vs 0.26 naive) |
+| 2019 | 2020–2021 | **0.748** | 0.688 (n=251, rate 38%) | 18.9 mo (vs 27.3 naive) | 0.168 (vs 0.20 naive) |
+| 2020 | 2021–2022 | **0.740** | 0.633 (n=413, rate **18%**) | 14.4 mo (vs 21.4 naive) | 0.135 (vs 0.148 naive) |
+
+Takeaways:
+- **Time delay signal transfers** to genuinely unseen future approvals (~0.74–0.80 vs 0.828 in-sample CV).
+- **The cost-overrun *flag* degrades on recent cohorts — and the report proves why:** the flag only
+  appears once a formal **revised estimate is sanctioned**, so it is censored exactly like the delay
+  label. Its approval-cohort base rate collapses
+  `2019: 64% → 2020: 52% → 2021: 29% → 2022: 11% → 2023: 3%`. The  0.633 window's test labels are
+  only **18% positive** (mostly *"not yet revised"*, not *"no overrun"*) — that AUC mostly measures
+  label completeness, not lost skill. On the settled 2019-2020 cohort cost reaches **0.712**.
+- **Linear regression (stats) leads on unseen data; tree-ensemble wins are in-sample only.**
+- **Regression (magnitude) is the robust out-of-sample win** — it beats the naive median in every
+  window and every task (cost 9–16%, delay months 29–33%). "How big will the overrun be" and
+  "how many months late" are predictable on new data; the binary flag on young projects is not a
+  settled question.
+- **Sector-rate drift is NOT the culprit (tested):** recency-decayed and rolling-window sector
+  encodings move AUC ≤ 0.005 on both tasks. The 0.846→0.633 gap is label censoring + model
+  optimism, not stale sector history. (`--encoding decay,rolling` in `temporal_eval.py` reproduces.)
+- Top-20% review rule is a practical way to use it: reviewing the 20% riskiest projects
+  by the model catches ~25–38% of all actual delays/overruns (1.2–1.9× lift over random).
+- **Honest deployment framing:** the in-sample CV said "cost is the clean win"; out-of-time says
+  **time transfers better, and the honest pitch is magnitude + ranking (reg MAE 9–33% below naive,
+  top-20% lift ~1.3–1.9×) plus the settled-cohort AUCs (cost ~0.71, time ~0.80)** — not the 0.846
+  class-flag headline.
+
+### Genuinely new document — May-2025 Flash Report holdout
+
+The model was also tested on a **real, later snapshot** — the May-2025 Flash Report
+(`data/raw/FR_May2025.pdf`, new Table-7 format, parsed by `src/flash2025_parser.py` into
+`data/mospi_may2025_projects.csv`, 1,559 projects, 18 sectors). This is a different document
+whose labels are **resolved as of May-2025** (delay = anticipated DOC > original DOC; overrun vs
+revised plan) — so its 2019-2021 cohorts are *not* subject to the label censoring above. Train
+stays on the pre-cutoff annexure data. Full output: `data/external_holdout_2025.json`.
+
+| Train ≤ | Test = May-2025 cohort | Time AUC | Cost AUC | Time reg MAE (vs naive) | Cost reg MAE (vs naive) |
+|---|---|---|---|---|---|
+| 2017 | 2018–2019 (n=196/207) | **0.806** | 0.640 | 16.8 mo (vs 23.7 naive, −29%) | 0.273 (vs 0.31, −12%) |
+| 2018 | 2019–2020 (n=244/288) | **0.810** | **0.719** | 16.2 mo (vs 23.1, −30%) | 0.217 (vs 0.262, −17%) |
+| 2019 | 2020–2021 (n=364/450) | **0.740** | 0.665 | 15.1 mo (vs 23.1, −35%) | 0.193 (vs 0.203, −5%) |
+
+- **Time delay detection transfers to a genuinely different document** (AUC 0.74–0.81), and time
+  reg magnitudes are 29–35% more accurate than the naive median — the strongest generalization check to date.
+- **Cost *classification* is honestly weaker out-of-document (AUC 0.64–0.72)** — consistent with the
+  reviewer's point that the in-sample "cost clean win" was optimism. The deployable metric for cost
+  remains **ranking + magnitude**: the top-20% review catches 37–45% of actual overruns (1.85–2.23× lift),
+  and cost reg MAE beats naive by 5–17%.
+- These resolved 2019–2021 rows are exactly the "more data" lever: appending them to the training set
+  (or retraining on each new official Flash Report, the platform's designed Data & Retrain loop) is what
+  improves estimates for the still-censored 2022+ cohorts.
+
+```bash
+python -m src.temporal_eval --external 2017,2018,2019   # external May-2025 holdout
+```
+
+### Macro-economic covariates: tested, rejected
+
+`data/macro_by_year.csv` adds approval-year WPI/CPI inflation, RBI repo rate, and real GDP
+growth (public RBI/IMF figures). The A/B (`python -m src.temporal_eval --macro 2017,2018,2019`,
+→ `data/macro_experiment.json`) runs the same external holdout with/without those 4 features:
+
+| cutoff | Cost AUC → +macro | Time AUC → +macro |
+|---|---|---|
+| 2017 | 0.640 → 0.641 | 0.806 → 0.780 |
+| 2018 | 0.719 → 0.699 | 0.810 → 0.795 |
+| 2019 | 0.665 → 0.657 | 0.740 → 0.681 |
+
+Adding macro data recovers nothing — cost moves ≤ ±0.02 and time *degrades* (LR AUC falls
+0.70→0.63 / 0.78→0.68 / 0.74→0.59; the small train set can't afford 4 extra features). This
+closes the "COVID-era macro drift" hypothesis: the out-of-sample gap is label censoring +
+in-sample optimism, not a missing macroeconomic signal. (Values are approximate public figures —
+verify from RBI/IMF before a live demo.)
+
+### Survival reframing: fixing the censoring, not hiding it
+
+`python -m src.temporal_eval --survival 2017,2018,2019,2020` → `data/survival_eval_2025.json`
+re-runs the external holdout with the delay label turned into **time-to-event with
+right-censoring** (discrete-time logistic hazard, no new dependencies): a project not yet
+flagged delayed is a **censored observation**, not a safe negative. Scoring uses Harrell's
+**C-index**, which is valid when most of a cohort is still censored — the exact regime where a
+binary AUC reports "model skill" but is really measuring label completeness.
+
+| Train ≤ | Test = May-2025 cohort | % still censored | Survival C-index | Binary-LR C-index |
+|---|---|---|---|---|
+| 2017 | 2018–2019 (n=207) | 22% | 0.590 | **0.604** |
+| 2018 | 2019–2020 (n=288) | 30% | **0.646** | 0.629 |
+| 2019 | 2020–2021 (n=450) | 35% | **0.593** | 0.567 |
+| 2020 | 2021–2022 (n=557) | **47%** | **0.639** | 0.587 |
+
+- The survival framing **keeps the newest, most-censored cohort (2021–22, 47% still unflagged)
+  evaluable and ranks better there** — a cohort where the binary classifier's AUC is not
+  meaningful and its C-index drops to 0.587 while survival holds 0.639.
+- The fitted **baseline hazard tells the censoring story directly**: P(flagged delayed) is
+  <0.02/yr for the first 6 years, then jumps to ~0.26–0.27/yr at years 7–10 — delays are
+  *revealed* near or after planned completion, so young projects "looking fine" is the model
+  expecting the event, not a clean bill of health.
+- Honest scope: survive-at-planned-horizon probabilities rank the resolved *ever-flagged*
+  outcome worse than a binary LR (that probability is a different quantity); the time-to-event
+  metric to compare on is C-index, where survival ties or beats the binary model on 3 of 4
+  windows. The architecture upgrade path from the literature review is: (1) this survival
+  reframing → (2) tune/add resolved May-2025 rows to the GBM training set → (3) per-project
+  snapshot **sequence models** (LSTM/Transformer over successive Flash Reports) once ≥2 months
+  are ingested per project.
+
+### Training-set augmentation: does adding resolved rows help? (tested)
+
+`python -m src.temporal_eval --augment 2017,2018,2019` → `data/augmented_train_holdout_2025.json`.
+Same external holdout, test rows unchanged; the only change is the *training set*:
+
+| Train ≤ | Baseline train → Augmented adds | Cost AUC → | Time AUC → | Cost reg MAE → | Time reg MAE → |
+|---|---|---|---|---|---|
+| 2017 | annexure 229 → +288 snapshot rows | 0.640 → **0.704** | 0.806 → 0.777 | 0.273 → **0.187** (−31%) | 16.8 → 18.0 (−7%) |
+| 2018 | annexure 287 → +398 | 0.719 → 0.705 | 0.810 → 0.785 | 0.217 → **0.156** (−28%) | 16.2 → 17.9 (−10%) |
+| 2019 | annexure 351 → +495 | 0.665 → **0.718** | 0.740 → 0.739 | 0.193 → **0.124** (−35%) | 15.1 → 17.4 (−15%) |
+
+- **Cost: augmentation is clearly worth it** — AUC up on 2 of 3 windows (avg +0.03) and reg MAE
+  28–35% lower. The cost label means the *same thing* in both documents (anticipated vs original
+  cost), so each resolved row is genuine signal for the next cohorts.
+- **Time: augmentation does not help** — AUC −0.03/−0.02/−0.001, reg MAE 7–15% worse. This is the
+  measurement of the label-semantics mismatch: the annexure time label is "time overrun reported
+  vs approved schedule" (TOR-based), the May-2025 snapshot's is "anticipated DOC > original DOC".
+  Merging them injects label noise.
+- **Operational rule for the platform's retrain loop:** ingest new Flash Reports for the *cost*
+  model freely; for the *time* model, add new snapshots only after normalizing the delay
+  definition to one rule (e.g. always anticipated-DOC-based) — otherwise more data actively hurts.
+
+### Fed into the live models
+
+`python -m src.predict` (the dashboard's serve path) now retrains with the augmentation baked in:
+`ModelService.train()` defaults to `augment_cost=True, augment_time=False`, so the **served cost
+model trains on annexure + 1,559 resolved May-2025 rows (2,772 total)** and the time model stays
+annexure-only, per the A/B above. The retrained, versioned estimators persist to `data/models/`
+(version bumps v1→v2→v3; monotonic across restarts): cost clf CV AUC **0.805**, cost **reg MAE
+0.160** (was ~0.24), base rate 0.343; time AUC 0.828 / MAE 21.3 unchanged. `--no-augment` reverts
+the cost training set to annexure-only.
 
 ---
 
@@ -149,34 +312,77 @@ PAIMANA-style government-portal UI with a ministry header and sidebar navigation
 - **Dashboard** — KPI cards (portfolio, avg cost overrun, risk), sector benchmark table,
   cost-vs-delay risk bubble chart
 - **Geospatial Map** — India choropleth from **real state-wise MoSPI data** (32 states), coloured
-  by delay risk / cost overrun / project count; **click a state** for a drill-down card.
+  by delay risk / cost overrun / project count; **click a state** for a drill-down card
+  (rank, share of portfolio, recommended action). Includes a KPI strip, a top-overrun bar
+  chart, a **priority watchlist** (colour-coded Escalate / Review / Monitor) and a
+  **decision-support** card showing where the portfolio's overrun exposure is concentrated.
   Boundary file is auto-simplified (Douglas-Peucker) so it stays responsive.
 - **Project Explorer** — pick a project -> cost/delay risk + tier, cost overrun, AI explanation
-- **AI Assistant** — interactive chat that answers free questions over the real data
-  (e.g. *"how many airport-related projects?"*, *"top 10 at-risk projects"*,
-  *"coal sector summary"*, *"overall portfolio status"*)
+- **AI Assistant** — Live LLM chat over the portfolio (see below)
+- **Data & Retrain** — add the latest project data (or upload a Flash Report PDF/CSV), then
+  **retrain the estimators in place** and bump the served model version (continual learning).
+  Also shows the **out-of-sample temporal validation** results ("how good on NEW data?").
+
+## Budget & Time Estimates + Continual Learning (outcome c/d, plus hard-official use)
+
+Built on top of the models, in `src/predict.py` and `src/ingest.py`:
+
+- **`src/predict.py`** — persistent, versioned, leak-free inference:
+  - `CostEstimator` → P(cost overrun) **and** a predicted *₹ overrun* (regression on
+    `overrun_ratio`, MAE ~0.24 vs 0.34 naive median). Classification AUC **~0.846**.
+  - `TimeEstimator` → P(delay) and predicted *delay months* (leak-free, AUC **~0.828**).
+  - `ModelService.train()` fits both, persists to `data/models/` (`cost.joblib`,
+    `time.joblib`, `version.json`), auto-incrementing `version` each retrain.
+  - `predict_project(row)` returns the latest served version's estimates.
+- **`src/ingest.py`** — Flash Report ingestion that closes the loop:
+  - `dedupe_append()` merges a new month over existing rows *incrementally* (only touched
+    keys updated; genuinely-new keys appended; pre-existing data left intact).
+  - `census_age()` recomputes `delayed`/`tor_months` honestly (a project is only flagged
+    delayed once the report actually shows a TOR — no look-ahead).
+  - `ingest_and_retrain()` appends the CSV/PDF data and calls `train_all()` for **online /
+    continual learning** on all accumulated data, saving a new model version.
+- **Dashboard wiring** (`src/dashboard.py`):
+  - Per-project **predicted ₹ cost overrun**, **predicted new cost**, **P(delay)** and
+    **predicted delay months** appear on the Project Explorer, with honest confidence
+    bounds (reg MAE) — the concrete "how much will this cost / how long will it take"
+    estimate an official can act on.
+  - **Data & Retrain** page: form to add a project, or upload a new Flash Report PDF/CSV,
+    then retrain and bump the served version.
+
+```bash
+python src/predict.py   # (re)train & persist models to data/models/ (v1+)
+streamlit run src/dashboard.py
+```
 
 ## AI Assistant (`src/assistant.py`)
 
-A **tool-using agent**: the user question is mapped to one of five live query tools
-(`search_projects`, `sector_stats`, `top_risk_projects`, `project_detail`,
+A **tool-using agent**: the user question is mapped to one of six live query tools
+(`search_projects`, `sector_stats`, `top_risk_projects`, `rank_projects`, `project_detail`,
 `portfolio_overview`) which execute against the real project/risk data and return a genuine
-count/aggregate/table — never canned text. When Ollama is available it chooses the tool
-(structured function-calling) and phrases the answer; when it isn't, a deterministic query
-engine answers the same questions so the demo still works.
+count/aggregate/table — never canned text. Ollama's `llama3.1:8b` picks the tool via
+structured **function-calling** and phrases the answer; if the LLM routes to a tool that
+clearly fails, a deterministic engine re-answers so the chat never dead-ends.
+When Ollama is down entirely, the deterministic engine answers the same questions directly.
 
-> For the LLM tool-calling path use a tool-capable model, e.g. `ollama pull llama3.1:8b`
-> or `qwen2.5:7b-instruct` (`set MOSPI_LLM_MODEL=...`). A 3B base model may not support
-> function calling cleanly; the deterministic engine covers all demos regardless.
+> **Real speed on the default setup:** a demo run answered 5 questions through the live LLM
+> in ~7–32 s each (first call includes model warm-up). For a real-time feel, set
+> `MOSPI_LLM_MODEL=llama3.1:8b` (default) on a GPU or swap to a smaller model.
+
+```bash
+python -m src.demo_assistant        # KILLER-DEMO script: 5 scripted questions, live LLM
+python -m src.demo_assistant --all  # also print full answers + observed latency
+```
 
 ## LLM explanation (`src/explainer.py`)
 
 - `build_feature_record(row, is_time)` — deterministic risk scoring, **identical** to the
-  finetune data labels so runtime explanations match training.
+  finetune data labels so runtime explanations match training. Also derives a plain-language
+  `reasons` string from the project's own numbers when the report has none.
 - `explain(feat)` — calls **Ollama** (local open-source model) first; **falls back to a
   deterministic template** if Ollama/model is absent. Demo never breaks.
 - Configure via env: `MOSPI_OLLAMA_URL` (default `http://localhost:11434`),
-  `MOSPI_LLM_MODEL` (default `qwen2.5:3b-instruct`).
+  `MOSPI_LLM_MODEL` (default `llama3.1:8b` — tool-capable; the old default was the 3B model
+  which doesn't do function-calling).
 - The Project Explorer only calls the LLM for the single selected project (bulk view uses
   the fast template path) so the app stays responsive.
 

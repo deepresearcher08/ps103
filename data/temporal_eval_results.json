@@ -1,0 +1,1213 @@
+{
+  "method": "Temporal holdout: train on ALL projects approved <= cutoff; evaluate on projects approved in the following 2 years (data the model never saw).",
+  "censoring": "Projects approved 2022+ are too young to have been flagged delayed yet \u2014 delayed rate collapses by cohort; new cohorts are NOT usable as a skill test. The COST overrun label is censored the same way (a flag only appears once a revised estimate exists), and its base rate collapses 0.56 -> 0.38 -> 0.18 across the 2019/2020/2021 test cohorts \u2014 so the later cost AUC columns measure label completeness, not model skill.",
+  "label_censoring": {
+    "cost_overrun_base_rate_by_approval": {
+      "1981": {
+        "rate": 1.0,
+        "n": 1
+      },
+      "1991": {
+        "rate": 1.0,
+        "n": 1
+      },
+      "1994": {
+        "rate": 1.0,
+        "n": 1
+      },
+      "1995": {
+        "rate": 1.0,
+        "n": 1
+      },
+      "1996": {
+        "rate": 1.0,
+        "n": 1
+      },
+      "1997": {
+        "rate": 1.0,
+        "n": 1
+      },
+      "1998": {
+        "rate": 1.0,
+        "n": 1
+      },
+      "2000": {
+        "rate": 1.0,
+        "n": 1
+      },
+      "2001": {
+        "rate": 1.0,
+        "n": 2
+      },
+      "2002": {
+        "rate": 1.0,
+        "n": 1
+      },
+      "2003": {
+        "rate": 1.0,
+        "n": 4
+      },
+      "2005": {
+        "rate": 1.0,
+        "n": 2
+      },
+      "2006": {
+        "rate": 1.0,
+        "n": 7
+      },
+      "2007": {
+        "rate": 1.0,
+        "n": 5
+      },
+      "2008": {
+        "rate": 0.875,
+        "n": 8
+      },
+      "2009": {
+        "rate": 0.917,
+        "n": 12
+      },
+      "2010": {
+        "rate": 1.0,
+        "n": 7
+      },
+      "2011": {
+        "rate": 0.818,
+        "n": 11
+      },
+      "2012": {
+        "rate": 1.0,
+        "n": 5
+      },
+      "2013": {
+        "rate": 0.818,
+        "n": 11
+      },
+      "2014": {
+        "rate": 1.0,
+        "n": 15
+      },
+      "2015": {
+        "rate": 0.947,
+        "n": 38
+      },
+      "2016": {
+        "rate": 0.929,
+        "n": 42
+      },
+      "2017": {
+        "rate": 0.784,
+        "n": 51
+      },
+      "2018": {
+        "rate": 0.793,
+        "n": 58
+      },
+      "2019": {
+        "rate": 0.641,
+        "n": 64
+      },
+      "2020": {
+        "rate": 0.515,
+        "n": 99
+      },
+      "2021": {
+        "rate": 0.289,
+        "n": 152
+      },
+      "2022": {
+        "rate": 0.111,
+        "n": 261
+      },
+      "2023": {
+        "rate": 0.03,
+        "n": 132
+      },
+      "2024": {
+        "rate": 0.0,
+        "n": 12
+      }
+    },
+    "delayed_base_rate_by_approval": {
+      "1981": {
+        "rate": 1.0,
+        "n": 2
+      },
+      "1991": {
+        "rate": 1.0,
+        "n": 7
+      },
+      "1994": {
+        "rate": 1.0,
+        "n": 2
+      },
+      "1995": {
+        "rate": 1.0,
+        "n": 2
+      },
+      "1996": {
+        "rate": 1.0,
+        "n": 2
+      },
+      "1997": {
+        "rate": 1.0,
+        "n": 2
+      },
+      "1998": {
+        "rate": 1.0,
+        "n": 2
+      },
+      "1999": {
+        "rate": 0.0,
+        "n": 1
+      },
+      "2000": {
+        "rate": 1.0,
+        "n": 2
+      },
+      "2001": {
+        "rate": 1.0,
+        "n": 4
+      },
+      "2002": {
+        "rate": 1.0,
+        "n": 2
+      },
+      "2003": {
+        "rate": 1.0,
+        "n": 6
+      },
+      "2005": {
+        "rate": 1.0,
+        "n": 4
+      },
+      "2006": {
+        "rate": 1.0,
+        "n": 14
+      },
+      "2007": {
+        "rate": 1.0,
+        "n": 9
+      },
+      "2008": {
+        "rate": 0.867,
+        "n": 15
+      },
+      "2009": {
+        "rate": 0.929,
+        "n": 14
+      },
+      "2010": {
+        "rate": 1.0,
+        "n": 13
+      },
+      "2011": {
+        "rate": 0.909,
+        "n": 22
+      },
+      "2012": {
+        "rate": 1.0,
+        "n": 9
+      },
+      "2013": {
+        "rate": 0.92,
+        "n": 25
+      },
+      "2014": {
+        "rate": 1.0,
+        "n": 32
+      },
+      "2015": {
+        "rate": 0.957,
+        "n": 70
+      },
+      "2016": {
+        "rate": 0.97,
+        "n": 101
+      },
+      "2017": {
+        "rate": 0.882,
+        "n": 93
+      },
+      "2018": {
+        "rate": 0.904,
+        "n": 135
+      },
+      "2019": {
+        "rate": 0.797,
+        "n": 143
+      },
+      "2020": {
+        "rate": 0.773,
+        "n": 238
+      },
+      "2021": {
+        "rate": 0.619,
+        "n": 289
+      },
+      "2022": {
+        "rate": 0.24,
+        "n": 317
+      },
+      "2023": {
+        "rate": 0.074,
+        "n": 148
+      },
+      "2024": {
+        "rate": 0.0,
+        "n": 12
+      }
+    }
+  },
+  "encodings": {
+    "order": [
+      "full",
+      "decay",
+      "rolling"
+    ],
+    "description": {
+      "full": "all training history weighted equally (stale-prone)",
+      "decay": "exponential recency decay over training years (halflife=4y)",
+      "rolling": "only the last window=5 training years used"
+    }
+  },
+  "results": {
+    "cutoff_2018": {
+      "cutoff": 2018,
+      "test_window": "2019-2020",
+      "encoding": "full",
+      "cost": {
+        "n_train": 287,
+        "n_test": 163,
+        "clf": {
+          "auc_by_model": {
+            "Logistic Regression": 0.7123392529087569,
+            "Random Forest": 0.6893753827311697,
+            "LightGBM": 0.6338028169014085
+          },
+          "best": "Logistic Regression",
+          "auc": 0.712,
+          "test_base_rate": 0.564,
+          "thr@0.5": {
+            "flagged": 163,
+            "precision": 0.564,
+            "recall": 1.0
+          },
+          "top20pct": {
+            "top_pct": 0.2,
+            "recall@top": 0.272,
+            "lift": 1.36
+          }
+        },
+        "reg": {
+          "best": "Random Forest",
+          "mae": 0.227,
+          "mae_by_model": {
+            "Linear Regression": 0.244,
+            "Random Forest": 0.227,
+            "LightGBM": 0.267
+          },
+          "naive_median_mae": 0.26,
+          "improvement_vs_naive_pct": 12.9,
+          "sample_signed_mae": 0.246
+        }
+      },
+      "time": {
+        "n_train": 590,
+        "n_test": 381,
+        "clf": {
+          "auc_by_model": {
+            "Logistic Regression": 0.8023975095010916,
+            "Random Forest": 0.7599660386512492,
+            "LightGBM": 0.7250950109161478
+          },
+          "best": "Logistic Regression",
+          "auc": 0.802,
+          "test_base_rate": 0.782,
+          "thr@0.5": {
+            "flagged": 381,
+            "precision": 0.782,
+            "recall": 1.0
+          },
+          "top20pct": {
+            "top_pct": 0.2,
+            "recall@top": 0.248,
+            "lift": 1.24
+          }
+        },
+        "reg": {
+          "best": "Random Forest",
+          "mae_months": 20.6,
+          "naive_median_mae": 28.9,
+          "improvement_vs_naive_pct": 28.8,
+          "test_n_delayed": 298
+        }
+      },
+      "observation_window_note": "Delayed rate for approvals in 2019: 0.78 -> 2020: 0.77 -> 2021: 0.62 (older approvals, watched longer, look worse)."
+    },
+    "cutoff_2019": {
+      "cutoff": 2019,
+      "test_window": "2020-2021",
+      "encoding": "full",
+      "cost": {
+        "n_train": 351,
+        "n_test": 251,
+        "clf": {
+          "auc_by_model": {
+            "Logistic Regression": 0.6884615384615385,
+            "Random Forest": 0.6749325236167342,
+            "LightGBM": 0.5960188933873145
+          },
+          "best": "Logistic Regression",
+          "auc": 0.688,
+          "test_base_rate": 0.378,
+          "thr@0.5": {
+            "flagged": 249,
+            "precision": 0.378,
+            "recall": 0.989
+          },
+          "top20pct": {
+            "top_pct": 0.2,
+            "recall@top": 0.316,
+            "lift": 1.58
+          }
+        },
+        "reg": {
+          "best": "Linear Regression",
+          "mae": 0.168,
+          "mae_by_model": {
+            "Linear Regression": 0.168,
+            "Random Forest": 0.178,
+            "LightGBM": 0.194
+          },
+          "naive_median_mae": 0.2,
+          "improvement_vs_naive_pct": 16.3,
+          "sample_signed_mae": 0.165
+        }
+      },
+      "time": {
+        "n_train": 733,
+        "n_test": 527,
+        "clf": {
+          "auc_by_model": {
+            "Logistic Regression": 0.7480934623395821,
+            "Random Forest": 0.7095679634482296,
+            "LightGBM": 0.6504568971309548
+          },
+          "best": "Logistic Regression",
+          "auc": 0.748,
+          "test_base_rate": 0.689,
+          "thr@0.5": {
+            "flagged": 526,
+            "precision": 0.69,
+            "recall": 1.0
+          },
+          "top20pct": {
+            "top_pct": 0.2,
+            "recall@top": 0.253,
+            "lift": 1.27
+          }
+        },
+        "reg": {
+          "best": "Linear Regression",
+          "mae_months": 18.9,
+          "naive_median_mae": 27.3,
+          "improvement_vs_naive_pct": 30.6,
+          "test_n_delayed": 362
+        }
+      },
+      "observation_window_note": "Delayed rate for approvals in 2020: 0.69 -> 2021: 0.62 -> 2022: 0.24 (older approvals, watched longer, look worse)."
+    },
+    "cutoff_2020": {
+      "cutoff": 2020,
+      "test_window": "2021-2022",
+      "encoding": "full",
+      "cost": {
+        "n_train": 450,
+        "n_test": 413,
+        "clf": {
+          "auc_by_model": {
+            "Logistic Regression": 0.6055197421434326,
+            "Random Forest": 0.6329170024174052,
+            "LightGBM": 0.6164786462530218
+          },
+          "best": "Random Forest",
+          "auc": 0.633,
+          "test_base_rate": 0.177,
+          "thr@0.5": {
+            "flagged": 297,
+            "precision": 0.192,
+            "recall": 0.781
+          },
+          "top20pct": {
+            "top_pct": 0.2,
+            "recall@top": 0.384,
+            "lift": 1.92
+          }
+        },
+        "reg": {
+          "best": "Linear Regression",
+          "mae": 0.135,
+          "mae_by_model": {
+            "Linear Regression": 0.135,
+            "Random Forest": 0.174,
+            "LightGBM": 0.164
+          },
+          "naive_median_mae": 0.148,
+          "improvement_vs_naive_pct": 8.9,
+          "sample_signed_mae": 0.122
+        }
+      },
+      "time": {
+        "n_train": 971,
+        "n_test": 606,
+        "clf": {
+          "auc_by_model": {
+            "Logistic Regression": 0.7400033517680576,
+            "Random Forest": 0.7055136584548349,
+            "LightGBM": 0.678654823752863
+          },
+          "best": "Logistic Regression",
+          "auc": 0.74,
+          "test_base_rate": 0.421,
+          "thr@0.5": {
+            "flagged": 604,
+            "precision": 0.422,
+            "recall": 1.0
+          },
+          "top20pct": {
+            "top_pct": 0.2,
+            "recall@top": 0.345,
+            "lift": 1.73
+          }
+        },
+        "reg": {
+          "best": "Linear Regression",
+          "mae_months": 14.4,
+          "naive_median_mae": 21.4,
+          "improvement_vs_naive_pct": 32.9,
+          "test_n_delayed": 253
+        }
+      },
+      "observation_window_note": "Delayed rate for approvals in 2021: 0.42 -> 2022: 0.24 -> 2023: 0.07 (older approvals, watched longer, look worse)."
+    }
+  },
+  "results_by_encoding": {
+    "full": {
+      "cutoff_2018": {
+        "cutoff": 2018,
+        "test_window": "2019-2020",
+        "encoding": "full",
+        "cost": {
+          "n_train": 287,
+          "n_test": 163,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.7123392529087569,
+              "Random Forest": 0.6893753827311697,
+              "LightGBM": 0.6338028169014085
+            },
+            "best": "Logistic Regression",
+            "auc": 0.712,
+            "test_base_rate": 0.564,
+            "thr@0.5": {
+              "flagged": 163,
+              "precision": 0.564,
+              "recall": 1.0
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.272,
+              "lift": 1.36
+            }
+          },
+          "reg": {
+            "best": "Random Forest",
+            "mae": 0.227,
+            "mae_by_model": {
+              "Linear Regression": 0.244,
+              "Random Forest": 0.227,
+              "LightGBM": 0.267
+            },
+            "naive_median_mae": 0.26,
+            "improvement_vs_naive_pct": 12.9,
+            "sample_signed_mae": 0.246
+          }
+        },
+        "time": {
+          "n_train": 590,
+          "n_test": 381,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.8023975095010916,
+              "Random Forest": 0.7599660386512492,
+              "LightGBM": 0.7250950109161478
+            },
+            "best": "Logistic Regression",
+            "auc": 0.802,
+            "test_base_rate": 0.782,
+            "thr@0.5": {
+              "flagged": 381,
+              "precision": 0.782,
+              "recall": 1.0
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.248,
+              "lift": 1.24
+            }
+          },
+          "reg": {
+            "best": "Random Forest",
+            "mae_months": 20.6,
+            "naive_median_mae": 28.9,
+            "improvement_vs_naive_pct": 28.8,
+            "test_n_delayed": 298
+          }
+        },
+        "observation_window_note": "Delayed rate for approvals in 2019: 0.78 -> 2020: 0.77 -> 2021: 0.62 (older approvals, watched longer, look worse)."
+      },
+      "cutoff_2019": {
+        "cutoff": 2019,
+        "test_window": "2020-2021",
+        "encoding": "full",
+        "cost": {
+          "n_train": 351,
+          "n_test": 251,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.6884615384615385,
+              "Random Forest": 0.6749325236167342,
+              "LightGBM": 0.5960188933873145
+            },
+            "best": "Logistic Regression",
+            "auc": 0.688,
+            "test_base_rate": 0.378,
+            "thr@0.5": {
+              "flagged": 249,
+              "precision": 0.378,
+              "recall": 0.989
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.316,
+              "lift": 1.58
+            }
+          },
+          "reg": {
+            "best": "Linear Regression",
+            "mae": 0.168,
+            "mae_by_model": {
+              "Linear Regression": 0.168,
+              "Random Forest": 0.178,
+              "LightGBM": 0.194
+            },
+            "naive_median_mae": 0.2,
+            "improvement_vs_naive_pct": 16.3,
+            "sample_signed_mae": 0.165
+          }
+        },
+        "time": {
+          "n_train": 733,
+          "n_test": 527,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.7480934623395821,
+              "Random Forest": 0.7095679634482296,
+              "LightGBM": 0.6504568971309548
+            },
+            "best": "Logistic Regression",
+            "auc": 0.748,
+            "test_base_rate": 0.689,
+            "thr@0.5": {
+              "flagged": 526,
+              "precision": 0.69,
+              "recall": 1.0
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.253,
+              "lift": 1.27
+            }
+          },
+          "reg": {
+            "best": "Linear Regression",
+            "mae_months": 18.9,
+            "naive_median_mae": 27.3,
+            "improvement_vs_naive_pct": 30.6,
+            "test_n_delayed": 362
+          }
+        },
+        "observation_window_note": "Delayed rate for approvals in 2020: 0.69 -> 2021: 0.62 -> 2022: 0.24 (older approvals, watched longer, look worse)."
+      },
+      "cutoff_2020": {
+        "cutoff": 2020,
+        "test_window": "2021-2022",
+        "encoding": "full",
+        "cost": {
+          "n_train": 450,
+          "n_test": 413,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.6055197421434326,
+              "Random Forest": 0.6329170024174052,
+              "LightGBM": 0.6164786462530218
+            },
+            "best": "Random Forest",
+            "auc": 0.633,
+            "test_base_rate": 0.177,
+            "thr@0.5": {
+              "flagged": 297,
+              "precision": 0.192,
+              "recall": 0.781
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.384,
+              "lift": 1.92
+            }
+          },
+          "reg": {
+            "best": "Linear Regression",
+            "mae": 0.135,
+            "mae_by_model": {
+              "Linear Regression": 0.135,
+              "Random Forest": 0.174,
+              "LightGBM": 0.164
+            },
+            "naive_median_mae": 0.148,
+            "improvement_vs_naive_pct": 8.9,
+            "sample_signed_mae": 0.122
+          }
+        },
+        "time": {
+          "n_train": 971,
+          "n_test": 606,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.7400033517680576,
+              "Random Forest": 0.7055136584548349,
+              "LightGBM": 0.678654823752863
+            },
+            "best": "Logistic Regression",
+            "auc": 0.74,
+            "test_base_rate": 0.421,
+            "thr@0.5": {
+              "flagged": 604,
+              "precision": 0.422,
+              "recall": 1.0
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.345,
+              "lift": 1.73
+            }
+          },
+          "reg": {
+            "best": "Linear Regression",
+            "mae_months": 14.4,
+            "naive_median_mae": 21.4,
+            "improvement_vs_naive_pct": 32.9,
+            "test_n_delayed": 253
+          }
+        },
+        "observation_window_note": "Delayed rate for approvals in 2021: 0.42 -> 2022: 0.24 -> 2023: 0.07 (older approvals, watched longer, look worse)."
+      }
+    },
+    "decay": {
+      "cutoff_2018": {
+        "cutoff": 2018,
+        "test_window": "2019-2020",
+        "encoding": "decay",
+        "cost": {
+          "n_train": 287,
+          "n_test": 163,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.7143294549908145,
+              "Random Forest": 0.6901408450704226,
+              "LightGBM": 0.6509491733006735
+            },
+            "best": "Logistic Regression",
+            "auc": 0.714,
+            "test_base_rate": 0.564,
+            "thr@0.5": {
+              "flagged": 163,
+              "precision": 0.564,
+              "recall": 1.0
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.272,
+              "lift": 1.36
+            }
+          },
+          "reg": {
+            "best": "Random Forest",
+            "mae": 0.226,
+            "mae_by_model": {
+              "Linear Regression": 0.248,
+              "Random Forest": 0.226,
+              "LightGBM": 0.269
+            },
+            "naive_median_mae": 0.26,
+            "improvement_vs_naive_pct": 13.2,
+            "sample_signed_mae": 0.246
+          }
+        },
+        "time": {
+          "n_train": 590,
+          "n_test": 381,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.8041764372927953,
+              "Random Forest": 0.7609767930783538,
+              "LightGBM": 0.7460176275572088
+            },
+            "best": "Logistic Regression",
+            "auc": 0.804,
+            "test_base_rate": 0.782,
+            "thr@0.5": {
+              "flagged": 381,
+              "precision": 0.782,
+              "recall": 1.0
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.248,
+              "lift": 1.24
+            }
+          },
+          "reg": {
+            "best": "Random Forest",
+            "mae_months": 20.6,
+            "naive_median_mae": 28.9,
+            "improvement_vs_naive_pct": 28.8,
+            "test_n_delayed": 298
+          }
+        },
+        "observation_window_note": "Delayed rate for approvals in 2019: 0.78 -> 2020: 0.77 -> 2021: 0.62 (older approvals, watched longer, look worse)."
+      },
+      "cutoff_2019": {
+        "cutoff": 2019,
+        "test_window": "2020-2021",
+        "encoding": "decay",
+        "cost": {
+          "n_train": 351,
+          "n_test": 251,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.6898110661268556,
+              "Random Forest": 0.6764170040485831,
+              "LightGBM": 0.6301282051282051
+            },
+            "best": "Logistic Regression",
+            "auc": 0.69,
+            "test_base_rate": 0.378,
+            "thr@0.5": {
+              "flagged": 249,
+              "precision": 0.378,
+              "recall": 0.989
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.316,
+              "lift": 1.58
+            }
+          },
+          "reg": {
+            "best": "Random Forest",
+            "mae": 0.179,
+            "mae_by_model": {
+              "Linear Regression": 0.185,
+              "Random Forest": 0.179,
+              "LightGBM": 0.197
+            },
+            "naive_median_mae": 0.2,
+            "improvement_vs_naive_pct": 10.4,
+            "sample_signed_mae": 0.217
+          }
+        },
+        "time": {
+          "n_train": 733,
+          "n_test": 527,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.7478246993213735,
+              "Random Forest": 0.6992121884028757,
+              "LightGBM": 0.6542699724517906
+            },
+            "best": "Logistic Regression",
+            "auc": 0.748,
+            "test_base_rate": 0.689,
+            "thr@0.5": {
+              "flagged": 526,
+              "precision": 0.69,
+              "recall": 1.0
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.251,
+              "lift": 1.25
+            }
+          },
+          "reg": {
+            "best": "Linear Regression",
+            "mae_months": 18.9,
+            "naive_median_mae": 27.3,
+            "improvement_vs_naive_pct": 30.6,
+            "test_n_delayed": 362
+          }
+        },
+        "observation_window_note": "Delayed rate for approvals in 2020: 0.69 -> 2021: 0.62 -> 2022: 0.24 (older approvals, watched longer, look worse)."
+      },
+      "cutoff_2020": {
+        "cutoff": 2020,
+        "test_window": "2021-2022",
+        "encoding": "decay",
+        "cost": {
+          "n_train": 450,
+          "n_test": 413,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.600805801772764,
+              "Random Forest": 0.6301168412570507,
+              "LightGBM": 0.629572925060435
+            },
+            "best": "Random Forest",
+            "auc": 0.63,
+            "test_base_rate": 0.177,
+            "thr@0.5": {
+              "flagged": 296,
+              "precision": 0.196,
+              "recall": 0.795
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.37,
+              "lift": 1.85
+            }
+          },
+          "reg": {
+            "best": "Linear Regression",
+            "mae": 0.143,
+            "mae_by_model": {
+              "Linear Regression": 0.143,
+              "Random Forest": 0.172,
+              "LightGBM": 0.16
+            },
+            "naive_median_mae": 0.148,
+            "improvement_vs_naive_pct": 3.5,
+            "sample_signed_mae": 0.138
+          }
+        },
+        "time": {
+          "n_train": 971,
+          "n_test": 606,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.7382269146975029,
+              "Random Forest": 0.7019049215127646,
+              "LightGBM": 0.6697447069996089
+            },
+            "best": "Logistic Regression",
+            "auc": 0.738,
+            "test_base_rate": 0.421,
+            "thr@0.5": {
+              "flagged": 603,
+              "precision": 0.421,
+              "recall": 0.996
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.341,
+              "lift": 1.71
+            }
+          },
+          "reg": {
+            "best": "Linear Regression",
+            "mae_months": 14.4,
+            "naive_median_mae": 21.4,
+            "improvement_vs_naive_pct": 32.9,
+            "test_n_delayed": 253
+          }
+        },
+        "observation_window_note": "Delayed rate for approvals in 2021: 0.42 -> 2022: 0.24 -> 2023: 0.07 (older approvals, watched longer, look worse)."
+      }
+    },
+    "rolling": {
+      "cutoff_2018": {
+        "cutoff": 2018,
+        "test_window": "2019-2020",
+        "encoding": "rolling",
+        "cost": {
+          "n_train": 287,
+          "n_test": 163,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.7132578077158604,
+              "Random Forest": 0.6864666258420085,
+              "LightGBM": 0.6523270055113288
+            },
+            "best": "Logistic Regression",
+            "auc": 0.713,
+            "test_base_rate": 0.564,
+            "thr@0.5": {
+              "flagged": 163,
+              "precision": 0.564,
+              "recall": 1.0
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.272,
+              "lift": 1.36
+            }
+          },
+          "reg": {
+            "best": "Random Forest",
+            "mae": 0.224,
+            "mae_by_model": {
+              "Linear Regression": 0.264,
+              "Random Forest": 0.224,
+              "LightGBM": 0.265
+            },
+            "naive_median_mae": 0.26,
+            "improvement_vs_naive_pct": 14.1,
+            "sample_signed_mae": 0.252
+          }
+        },
+        "time": {
+          "n_train": 590,
+          "n_test": 381,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.8039742864073746,
+              "Random Forest": 0.7655049729117813,
+              "LightGBM": 0.7433290207811111
+            },
+            "best": "Logistic Regression",
+            "auc": 0.804,
+            "test_base_rate": 0.782,
+            "thr@0.5": {
+              "flagged": 381,
+              "precision": 0.782,
+              "recall": 1.0
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.248,
+              "lift": 1.24
+            }
+          },
+          "reg": {
+            "best": "Random Forest",
+            "mae_months": 20.6,
+            "naive_median_mae": 28.9,
+            "improvement_vs_naive_pct": 28.8,
+            "test_n_delayed": 298
+          }
+        },
+        "observation_window_note": "Delayed rate for approvals in 2019: 0.78 -> 2020: 0.77 -> 2021: 0.62 (older approvals, watched longer, look worse)."
+      },
+      "cutoff_2019": {
+        "cutoff": 2019,
+        "test_window": "2020-2021",
+        "encoding": "rolling",
+        "cost": {
+          "n_train": 351,
+          "n_test": 251,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.6889338731443995,
+              "Random Forest": 0.6752361673414305,
+              "LightGBM": 0.6000674763832659
+            },
+            "best": "Logistic Regression",
+            "auc": 0.689,
+            "test_base_rate": 0.378,
+            "thr@0.5": {
+              "flagged": 250,
+              "precision": 0.38,
+              "recall": 1.0
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.316,
+              "lift": 1.58
+            }
+          },
+          "reg": {
+            "best": "Random Forest",
+            "mae": 0.184,
+            "mae_by_model": {
+              "Linear Regression": 0.219,
+              "Random Forest": 0.184,
+              "LightGBM": 0.196
+            },
+            "naive_median_mae": 0.2,
+            "improvement_vs_naive_pct": 8.3,
+            "sample_signed_mae": 0.221
+          }
+        },
+        "time": {
+          "n_train": 733,
+          "n_test": 527,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.7472535779076799,
+              "Random Forest": 0.7017570382315393,
+              "LightGBM": 0.6425955788483505
+            },
+            "best": "Logistic Regression",
+            "auc": 0.747,
+            "test_base_rate": 0.689,
+            "thr@0.5": {
+              "flagged": 526,
+              "precision": 0.69,
+              "recall": 1.0
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.251,
+              "lift": 1.25
+            }
+          },
+          "reg": {
+            "best": "Linear Regression",
+            "mae_months": 18.9,
+            "naive_median_mae": 27.3,
+            "improvement_vs_naive_pct": 30.6,
+            "test_n_delayed": 362
+          }
+        },
+        "observation_window_note": "Delayed rate for approvals in 2020: 0.69 -> 2021: 0.62 -> 2022: 0.24 (older approvals, watched longer, look worse)."
+      },
+      "cutoff_2020": {
+        "cutoff": 2020,
+        "test_window": "2021-2022",
+        "encoding": "rolling",
+        "cost": {
+          "n_train": 450,
+          "n_test": 413,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.6005640612409346,
+              "Random Forest": 0.6280217566478645,
+              "LightGBM": 0.6278001611603545
+            },
+            "best": "Random Forest",
+            "auc": 0.628,
+            "test_base_rate": 0.177,
+            "thr@0.5": {
+              "flagged": 300,
+              "precision": 0.193,
+              "recall": 0.795
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.356,
+              "lift": 1.78
+            }
+          },
+          "reg": {
+            "best": "Linear Regression",
+            "mae": 0.156,
+            "mae_by_model": {
+              "Linear Regression": 0.156,
+              "Random Forest": 0.173,
+              "LightGBM": 0.16
+            },
+            "naive_median_mae": 0.148,
+            "improvement_vs_naive_pct": -5.0,
+            "sample_signed_mae": 0.156
+          }
+        },
+        "time": {
+          "n_train": 971,
+          "n_test": 606,
+          "clf": {
+            "auc_by_model": {
+              "Logistic Regression": 0.7368862074744428,
+              "Random Forest": 0.700675939891626,
+              "LightGBM": 0.6663985252220547
+            },
+            "best": "Logistic Regression",
+            "auc": 0.737,
+            "test_base_rate": 0.421,
+            "thr@0.5": {
+              "flagged": 604,
+              "precision": 0.422,
+              "recall": 1.0
+            },
+            "top20pct": {
+              "top_pct": 0.2,
+              "recall@top": 0.341,
+              "lift": 1.71
+            }
+          },
+          "reg": {
+            "best": "Linear Regression",
+            "mae_months": 14.4,
+            "naive_median_mae": 21.4,
+            "improvement_vs_naive_pct": 32.9,
+            "test_n_delayed": 253
+          }
+        },
+        "observation_window_note": "Delayed rate for approvals in 2021: 0.42 -> 2022: 0.24 -> 2023: 0.07 (older approvals, watched longer, look worse)."
+      }
+    }
+  },
+  "encoding_verdict": {
+    "time": [
+      {
+        "cutoff": 2018,
+        "test_window": "2019-2020",
+        "full": 0.802,
+        "decay": 0.804,
+        "rolling": 0.804
+      },
+      {
+        "cutoff": 2019,
+        "test_window": "2020-2021",
+        "full": 0.748,
+        "decay": 0.748,
+        "rolling": 0.747
+      },
+      {
+        "cutoff": 2020,
+        "test_window": "2021-2022",
+        "full": 0.74,
+        "decay": 0.738,
+        "rolling": 0.737
+      }
+    ],
+    "cost": [
+      {
+        "cutoff": 2018,
+        "test_window": "2019-2020",
+        "full": 0.712,
+        "decay": 0.714,
+        "rolling": 0.713
+      },
+      {
+        "cutoff": 2019,
+        "test_window": "2020-2021",
+        "full": 0.688,
+        "decay": 0.69,
+        "rolling": 0.689
+      },
+      {
+        "cutoff": 2020,
+        "test_window": "2021-2022",
+        "full": 0.633,
+        "decay": 0.63,
+        "rolling": 0.628
+      }
+    ]
+  },
+  "cutoffs": [
+    2018,
+    2019,
+    2020
+  ]
+}

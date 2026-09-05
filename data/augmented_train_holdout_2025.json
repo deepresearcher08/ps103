@@ -1,0 +1,191 @@
+{
+  "method": "Training-set augmentation A/B: same external holdout (train <= cutoff, test = May-2025 cohort approved cutoff+1..cutoff+2). BASELINE = annexure-only training. AUGMENTED = annexure training PLUS the resolved May-2025 snapshot rows approved <= cutoff (the continual-learning lever). Same metric functions, same test rows \u2014 the only change is more real, resolved training data.",
+  "run": "python -m src.temporal_eval --augment 2017,2018,2019",
+  "results": {
+    "cutoff_2017": {
+      "cutoff": 2017,
+      "test_window": "2018-2019",
+      "train_rows": {
+        "annexure_cost": 229,
+        "annexure_time": 455,
+        "added_snapshot_cost": 288,
+        "added_snapshot_time": 256
+      },
+      "test_rows": {
+        "cost": 207,
+        "time": 196
+      },
+      "baseline": {
+        "cost": {
+          "auc": 0.6401553874463299,
+          "auc_lr": 0.6401553874463299,
+          "reg_mae": 0.27297619950163315,
+          "naive_mae": 0.3100721760679608,
+          "reg_naive": null,
+          "n_test": 207,
+          "base_rate": 0.353
+        },
+        "time": {
+          "auc": 0.8055013309671695,
+          "auc_lr": 0.7043478260869565,
+          "reg_mae": 16.842204110375178,
+          "naive_mae": null,
+          "reg_naive": 23.732919254658384,
+          "n_test": 196,
+          "base_rate": 0.821
+        }
+      },
+      "augmented": {
+        "cost": {
+          "auc": 0.7039460233081168,
+          "auc_lr": 0.6297280719689226,
+          "reg_mae": 0.18709660496610386,
+          "naive_mae": 0.14645301066327798,
+          "reg_naive": null,
+          "n_test": 207,
+          "base_rate": 0.353
+        },
+        "time": {
+          "auc": 0.7772848269742679,
+          "auc_lr": 0.7087843833185448,
+          "reg_mae": 18.034279990260007,
+          "naive_mae": null,
+          "reg_naive": 23.732919254658384,
+          "n_test": 196,
+          "base_rate": 0.821
+        }
+      },
+      "delta": {
+        "cost_auc": 0.064,
+        "time_auc": -0.028,
+        "cost_reg_mae_pct": 31.5,
+        "time_reg_mae_pct": -7.1
+      }
+    },
+    "cutoff_2018": {
+      "cutoff": 2018,
+      "test_window": "2019-2020",
+      "train_rows": {
+        "annexure_cost": 287,
+        "annexure_time": 590,
+        "added_snapshot_cost": 398,
+        "added_snapshot_time": 360
+      },
+      "test_rows": {
+        "cost": 288,
+        "time": 244
+      },
+      "baseline": {
+        "cost": {
+          "auc": 0.718944099378882,
+          "auc_lr": 0.718944099378882,
+          "reg_mae": 0.21705320624131175,
+          "naive_mae": 0.2620267447850775,
+          "reg_naive": null,
+          "n_test": 288,
+          "base_rate": 0.319
+        },
+        "time": {
+          "auc": 0.8095238095238095,
+          "auc_lr": 0.784064120697784,
+          "reg_mae": 16.23322163315593,
+          "naive_mae": null,
+          "reg_naive": 23.138613861386137,
+          "n_test": 244,
+          "base_rate": 0.828
+        }
+      },
+      "augmented": {
+        "cost": {
+          "auc": 0.7052462289263532,
+          "auc_lr": 0.6846716947648624,
+          "reg_mae": 0.15646412848077196,
+          "naive_mae": 0.11756659211224038,
+          "reg_naive": null,
+          "n_test": 288,
+          "base_rate": 0.319
+        },
+        "time": {
+          "auc": 0.7853606789250354,
+          "auc_lr": 0.7853606789250354,
+          "reg_mae": 17.879697026412103,
+          "naive_mae": null,
+          "reg_naive": 24.06930693069307,
+          "n_test": 244,
+          "base_rate": 0.828
+        }
+      },
+      "delta": {
+        "cost_auc": -0.014,
+        "time_auc": -0.024,
+        "cost_reg_mae_pct": 27.9,
+        "time_reg_mae_pct": -10.1
+      }
+    },
+    "cutoff_2019": {
+      "cutoff": 2019,
+      "test_window": "2020-2021",
+      "train_rows": {
+        "annexure_cost": 351,
+        "annexure_time": 733,
+        "added_snapshot_cost": 495,
+        "added_snapshot_time": 452
+      },
+      "test_rows": {
+        "cost": 450,
+        "time": 364
+      },
+      "baseline": {
+        "cost": {
+          "auc": 0.6647532488240453,
+          "auc_lr": 0.6647532488240453,
+          "reg_mae": 0.19258069614446302,
+          "naive_mae": 0.20258742167806335,
+          "reg_naive": null,
+          "n_test": 450,
+          "base_rate": 0.247
+        },
+        "time": {
+          "auc": 0.7404321423527751,
+          "auc_lr": 0.7404321423527751,
+          "reg_mae": 15.10838696387856,
+          "naive_mae": null,
+          "reg_naive": 23.06529209621993,
+          "n_test": 364,
+          "base_rate": 0.799
+        }
+      },
+      "augmented": {
+        "cost": {
+          "auc": 0.7178240187089744,
+          "auc_lr": 0.6707061043344229,
+          "reg_mae": 0.12426747889558107,
+          "naive_mae": 0.07787564888888888,
+          "reg_naive": null,
+          "n_test": 450,
+          "base_rate": 0.247
+        },
+        "time": {
+          "auc": 0.7392082097632161,
+          "auc_lr": 0.7392082097632161,
+          "reg_mae": 17.39488428387988,
+          "naive_mae": null,
+          "reg_naive": 23.99656357388316,
+          "n_test": 364,
+          "base_rate": 0.799
+        }
+      },
+      "delta": {
+        "cost_auc": 0.053,
+        "time_auc": -0.001,
+        "cost_reg_mae_pct": 35.5,
+        "time_reg_mae_pct": -15.1
+      }
+    }
+  },
+  "cutoffs": [
+    2017,
+    2018,
+    2019
+  ]
+}
