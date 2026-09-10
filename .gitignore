@@ -33,3 +33,11 @@ SESSION_CONTEXT.md
 # OS
 .DS_Store
 Thumbs.db
+
+# AI harness / session tooling (not part of the deliverable)
+.opencode/
+
+# Local scratch / backfills
+*.statecentroid.bak
+data/temp_pace_*.txt
+rough layout.png

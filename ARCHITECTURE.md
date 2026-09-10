@@ -104,7 +104,7 @@ Never present the two models' outputs as the same number.
 | Cost reg MAE | 0.16 (vs ~0.34 naive) | `external_holdout_2025.json`, `augmented_train_holdout_2025.json` |
 | Time classification (content-only) | AUC 0.828 (RF); LR 0.806 | `time_model_results.json` |
 | Time delay reg MAE | 21.3 months (vs ~30-34 naive) | `time_model_results.json` |
-| External holdout (May-2025 doc, never seen) | time AUC 0.74–0.81; cost **recall-lift** 1.85–2.23× at top-20% (share of actual overrun flags caught) | `external_holdout_2025.json` |
+| External holdout (May-2025 doc, never seen) | time AUC 0.74–0.81; cost **recall-lift** 1.47–1.80× at top-20% (share of actual overrun flags caught) | `external_holdout_2025.json` |
 | Survival reframing (censoring-robust) | C-index 0.59–0.65 — **temporal external holdout** (train ≤ cutoff → May-2025 cohort), **not random CV**; modest (near 0.5 floor) but beats binary C-index on the most-censored cohort (0.639 vs 0.587) | `survival_eval_2025.json` |
 | Macro covariates | **Rejected** — no gain, time degrades | `macro_experiment.json` |
 

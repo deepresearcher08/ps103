@@ -19,7 +19,7 @@ import pdfplumber
 
 logger = logging.getLogger(__name__)
 
-PDF = Path(r"C:\Users\soumy\AppData\Local\Temp\opencode\pdfs\FlashReport_May_2024.pdf")
+PDF = Path(__file__).resolve().parents[1] / "data/raw/FlashReport_May_2024.pdf"
 
 STATES = {
     "ANDHRA PRADESH", "ARUNACHAL PRAD", "ARUNACHAL PRADESH", "ASSAM", "BIHAR", "CHHATTISGARH",

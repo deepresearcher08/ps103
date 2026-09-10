@@ -19,6 +19,8 @@ import numpy as np
 import pandas as pd
 import pdfplumber
 
+from src.geo import enrich_geo
+
 logger = logging.getLogger(__name__)
 
 VII_MARKER = "details of delayed projects"
@@ -159,12 +161,14 @@ def build_time_dataset(pdf_path: Path) -> pd.DataFrame:
     df["overrun_ratio"] = df["cost_overrun_pct"] / 100.0
     if "tor_months" not in df.columns:
         df["tor_months"] = np.nan
+    if not df.empty:
+        enrich_geo(df, "project_name")
     return df
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    pdf = Path(r"C:\Users\soumy\AppData\Local\Temp\opencode\pdfs\FlashReport_May_2024.pdf")
+    pdf = Path(__file__).resolve().parents[1] / "data/raw/FlashReport_May_2024.pdf"
     data = build_time_dataset(pdf)
     print("Total rows:", len(data))
     print("Delayed balance:\n", data["delayed"].value_counts())

@@ -200,10 +200,10 @@ stays on the pre-cutoff annexure data. Full output: `data/external_holdout_2025.
 
 - **Time delay detection transfers to a genuinely different document** (AUC 0.74–0.81), and time
   reg magnitudes are 29–35% more accurate than the naive median — the strongest generalization check to date.
-- **Cost *classification* is honestly weaker out-of-document (AUC 0.64–0.72)** — consistent with the
+- **Cost *classification* is honestly weaker out-of-document (AUC 0.62–0.69)** — consistent with the
   reviewer's point that the in-sample "cost clean win" was optimism. The deployable metric for cost
-  remains **ranking + magnitude**: the top-20% review catches 37–45% of actual overruns (1.85–2.23× lift),
-  and cost reg MAE beats naive by 5–17%.
+  remains **ranking + magnitude**: the top-20% review catches 29–36% of actual overruns (1.47–1.80× lift),
+  and cost reg MAE beats naive by 15–20%.
 - These resolved 2019–2021 rows are exactly the "more data" lever: appending them to the training set
   (or retraining on each new official Flash Report, the platform's designed Data & Retrain loop) is what
   improves estimates for the still-censored 2022+ cohorts.
@@ -369,7 +369,7 @@ When Ollama is down entirely, the deterministic engine answers the same question
 > `MOSPI_LLM_MODEL=llama3.1:8b` (default) on a GPU or swap to a smaller model.
 
 ```bash
-python -m src.demo_assistant        # KILLER-DEMO script: 5 scripted questions, live LLM
+python -m src.demo_assistant        # demo script: 5 scripted questions, live LLM
 python -m src.demo_assistant --all  # also print full answers + observed latency
 ```
 

@@ -1709,6 +1709,7 @@ def page_explorer():
             "sector": pr.get("sector"),
             "original_cost_cr": pr["original_cost_cr"],
             "expenditure_cum_cr": pr["expenditure_cum_cr"],
+            "approval_year": pr.get("approval_year"),
             "planned_duration_years": pr.get("tor_months") and (pr["tor_months"] / 12)
                                      or 5.0,
         })
@@ -1725,6 +1726,12 @@ def page_explorer():
                        f"delay ±{t.get('mae_months', 0):.0f} months. "
                        f"The 'Potential Extra Cost' metric flags projects where high "
                        f"probability meets large budget impact.")
+            used_c = c.get("schedule_used", True)
+            used_t = t.get("schedule_used", True)
+            if not (used_c and used_t):
+                st.caption("Schedule not provided (approval year / planned duration) — "
+                           "risk scored by the schedule-blind model with base features only, "
+                           "not assumed mid-flight.")
     except Exception as _e:  # model not present -> degrade gracefully
         st.caption("Predictive models not trained yet — run `python src/predict.py` "
                    "or add data on the 'Data & Retrain' page.")
@@ -1979,8 +1986,13 @@ versioned on every retrain.<br>
             report = ingest_and_retrain(time_new=new_row, cost_new=cost_new_row, verbose=False)
             st.success(f"Project added and models retrained (version {report['model']['version']}).")
             m = report["model"]
-            st.info(f"Cost: clf AUC {m['cost']['clf_auc']:.3f}, reg MAE {m['cost']['reg_mae']:.3f} "
+            st.info(f"Cost: clf AUC {m['cost']['clf_auc']:.3f} (5x2 repeated-stratified CV), "
+                    f"reg MAE {m['cost']['reg_mae']:.3f} "
                     f"· Time: clf AUC {m['time']['clf_auc']:.3f}, reg MAE {m['time']['reg_mae']:.0f} mo")
+            st.caption("CV figures hold out random projects (states shared across folds). "
+                       "External temporal holdout (unseen resolved-label cohorts 2019-2021): "
+                       f"cost {m.get('external_holdout_reference', {}).get('cost')} — "
+                       "the number to quote for generalization.")
         except Exception as e:
             st.error(f"Could not retrain: {e}")
 
@@ -2058,7 +2070,8 @@ def _right_panel(page):
         st.markdown('<div class="gov-rp"><h4>Continual Learning</h4>'
                      '<div class="rp-body">Add a project or upload '
                      'a Flash Report PDF/CSV, then retrain on all accumulated data. '
-                     'Models are versioned and leak-free.</div></div>',
+                     'Models are versioned, feature/label leak-free (out-of-fold encodings), '
+                     'and validated against unseen cohorts (external temporal holdout).</div></div>',
                     unsafe_allow_html=True)
     elif page == "Home":
         st.markdown('<div class="gov-rp"><h4>SIH 2026 · PS103</h4>'

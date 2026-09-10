@@ -27,7 +27,6 @@ from transformers import (
     BitsAndBytesConfig,
     TrainingArguments,
     Trainer,
-    DataCollatorForLanguageModeling,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,12 +56,33 @@ def load_dataset(tokenizer, path: Path):
         truncation=True,
         max_length=768,
         padding=False,
-        return_tensors=None,
+        return_tensors="np",
     )
-    ds = Dataset.from_list([{"input_ids": t["input_ids"], "attention_mask": t["attention_mask"]}
-                            for t in tokenized])
+    ds = Dataset.from_dict({
+        "input_ids": tokenized["input_ids"].tolist(),
+        "attention_mask": tokenized["attention_mask"].tolist(),
+    })
     ds = ds.map(lambda b: {"labels": b["input_ids"]}, batched=True)
     return ds
+
+
+class _PadCollator:
+    """Pad variable-length causal-LM batches to the longest sample; -100 masks loss
+    on padding tokens (equivalent to DataCollatorForLanguageModeling(mlm=False))."""
+
+    def __init__(self, tokenizer):
+        self.pad_id = tokenizer.pad_token_id
+
+    def __call__(self, features):
+        max_len = max(len(f["input_ids"]) for f in features)
+        out = {"input_ids": [], "attention_mask": [], "labels": []}
+        for f in features:
+            ids = f["input_ids"]
+            n = max_len - len(ids)
+            out["input_ids"].append(ids + [self.pad_id] * n)
+            out["attention_mask"].append(f["attention_mask"] + [0] * n)
+            out["labels"].append(f["labels"] + [-100] * n)
+        return {k: torch.tensor(v) for k, v in out.items()}
 
 
 def main():
@@ -108,7 +128,7 @@ def main():
     model.print_trainable_parameters()
 
     ds = load_dataset(tok, Path(args.data))
-    collator = DataCollatorForLanguageModeling(tokenizer=tok, mlm=False)
+    collator = _PadCollator(tok)
 
     targs = TrainingArguments(
         output_dir=str(out / "checkpoints"),
@@ -120,7 +140,7 @@ def main():
         save_strategy="epoch",
         save_total_limit=2,
         fp16=torch.cuda.is_available(),
-        report_to=None,
+        report_to=[],
         remove_unused_columns=False,
     )
     trainer = Trainer(model=model, args=targs, train_dataset=ds, data_collator=collator)

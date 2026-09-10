@@ -20,6 +20,8 @@ from pathlib import Path
 import pandas as pd
 import pdfplumber
 
+from src.geo import enrich_geo
+
 logger = logging.getLogger(__name__)
 
 # Annexure markers (subset match is fine because we locate by section + start page)
@@ -137,12 +139,14 @@ def build_real_dataset(pdf_path: Path) -> pd.DataFrame:
     df = pd.concat([pos_df, neg_df], ignore_index=True)
     # Derive overrun ratio where anticipated cost available (SPEC.md target).
     df["overrun_ratio"] = (df["anticipated_cost_cr"] - df["original_cost_cr"]) / df["original_cost_cr"]
+    if not df.empty:
+        enrich_geo(df, "project_name")
     return df
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    pdf = Path(r"C:\Users\soumy\AppData\Local\Temp\opencode\pdfs\FlashReport_May_2024.pdf")
+    pdf = Path(__file__).resolve().parents[1] / "data/raw/FlashReport_May_2024.pdf"
     data = build_real_dataset(pdf)
     print("Total rows:", len(data))
     print("Flag balance:\n", data["overrun_flag"].value_counts())

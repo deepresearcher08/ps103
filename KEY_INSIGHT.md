@@ -8,8 +8,9 @@ from the repo's own data (`data/real_mospi_projects.csv`, `data/real_mospi_time.
 > all rupee exposures) were produced by the **research / screening model**: fit on the 1,213
 > annexure rows **only**, then scored on the 1,559 May-2025 rows it had **never seen** — a genuine
 > out-of-sample screen. The **live dashboard** instead serves a *refreshed* model (annexure +
-> resolved May-2025 rows, n=2,772; cost AUC 0.805, reg MAE 0.160), which the augmentation A/B
-> showed is the *better-informed* one for cost. So **per-project numbers on the running app will
+> resolved May-2025 rows, n=2,772; cost AUC 0.927 in-fold shared-state CV, reg MAE 0.130; the
+> annexure-only grouped-by-state figure is 0.92–0.96 clf and the external document 0.62–0.69),
+> which the augmentation A/B showed is the *better-informed* one for cost. So **per-project numbers on the running app will
 > differ from the 348-list** — that is intentional. Label the headline as *research-model output*
 > and the dashboard as *the refreshed production model*; never present them as the same number.
 >
@@ -108,7 +109,7 @@ headline example; it remains in the full reproducible output if asked._
 | Scaling | React after failure | Predict before failure |
 
 **Honesty about the binary flag:** on the truly out-of-document May-2025 holdout, cost
-*classification* AUC is **0.64–0.72** (vs 0.846 in-sample CV) — this is exactly why the project
+*classification* AUC is **0.62–0.69** (vs 0.846 in-sample CV) — this is exactly why the project
 leads with **magnitude + ranking**, not the class-flag headline. That reframe is used everywhere,
 including the savings logic below.
 
@@ -166,8 +167,10 @@ on the ranked list):
   20%, ≈3.8× rupee concentration, plus exact counts (348 of 1,203) and the AUC-based ranking.**
 
 **Two "lift" numbers exist — never merge them:**
-1. **1.85–2.23× recall-lift** (external holdout): the share of *actual overrun flags* caught by
-   the top-20% ranked list vs a random 20% of the same size.
+1. **1.47–1.80× recall-lift** (external May-2025 holdout, cost, `data/external_holdout_2025.json`;
+   top-20% catches 29–36% of actual overrun flags vs ~20% random). The top-20% lift reaches
+   ~2.05× only on the youngest, most-censored in-file temporal cohort — do NOT quote that as
+   the external figure.
 2. **≈3.8× rupee-concentration factor** (this doc): the *expected rupee overrun* in the top-20%
    ranked list (~75% of the total) vs the ~20% a random slice holds.
 They measure different things and must be labeled as such ("recall-lift" vs "rupee concentration").
@@ -191,9 +194,34 @@ They measure different things and must be labeled as such ("recall-lift" vs "rup
   is modest and near the non-informative 0.5 floor; its one real claim is that it ranks better than
   the binary model exactly on the *most-censored* cohort — 0.639 vs 0.587 at 47% still unflagged —
   and it keeps the newest cohort evaluable at all.
-- **Cost classification on the May-2025 document is 0.64–0.72, not 0.85.** The 0.846 is
+- **Cost classification on the May-2025 document is 0.62–0.69, not 0.85.** The 0.846 is
   in-sample (annexure CV). The deployable claim is ranking + magnitude (top-20% recall-lift
-  1.85–2.23×; cost reg MAE beats naive by 5–17%).
+  1.47–1.80×; cost reg MAE beats naive by 15–20%).
+
+## 8. What each feature buys — and the cost/time asymmetry
+
+Every addition to the models was validated two ways: (a) **GroupKFold-by-state** CV on the annexure
+(row-train/row-test never share a state), and (b) the **May-2025 external document** (train on
+annexure ≤ cutoff, test the 2018–2021 resolved cohorts). A feature is kept only when leak-free and
+its effect is neither oversold nor hidden. Current verdicts:
+
+| Feature | Leak-free? | Grouped-by-state effect | External effect | Verdict |
+|---|---|---|---|---|
+| spend pace (elapsed share / spend rate) | yes | cost +0.08 clf, time +0.13–0.16 clf | time +0.056..+0.111 | **The core real signal** |
+| schedule risk → cost (OOF expected P(delayed)) | yes | cost +0.008 clf | −0.069..+0.015, reg flat | neutral, not oversold |
+| input-price escalation (sector WPI/fx, ref 2024) | yes | cost clf +0.008..0.010, R² +0.008 | clf wash; **reg MAE −0.017…−0.018 on all cutoffs** | keep for magnitude |
+| sanction growth to date (`revise_log`) | yes (decision-time) | cost reg −0.012…−0.014, RF +0.013 clf | cost clf **+0.007..+0.011 on all cutoffs**, reg flat | keep |
+| agency delay rate (TIME) | yes (OOF) | time +0.039..+0.042 clf | ~0 (May-2025 snapshot has no agency suffix) | keep, inert-when-absent |
+
+**The asymmetry the numbers expose:** cost overrun is driven substantially by *exogenous,
+legible shocks* — input prices, sanction revisions, contract type — precisely the quantities a
+model encodes without touching the outcome (price indices from public WPI/fx series; revisions are
+announced before an overrun is declared). That is why **each cost feature keeps earning
+out-of-sample**, and why the cost model's ceiling is set by *data breadth*, not methodology. Time
+overrun, by contrast, is dominated by *endogenous execution entropy* (land, contractor behaviour,
+sequencing) plus heavy label censoring on young cohorts — so its external AUC (0.81–0.88) stagnates
+once pacing is in, and exercise reduces to: *pace works, new features are inert.* The pitch should
+say **cost is where the ex-ante signal lives**; time is a screening aid, not a crystal ball.
 
 ## Reproducibility
 

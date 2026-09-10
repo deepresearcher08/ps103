@@ -1,4 +1,4 @@
-"""AI Assistant demo script — run the killer demo questions through the live LLM.
+"""LLM Assistant demo — runs the demo questions through the live assistant.
 
 Purpose: practise / record the value proposition in minutes. Each question goes
 through the REAL pipeline: Ollama LLM selects a tool (function-calling), the tool
@@ -38,7 +38,7 @@ def main(show_raw: bool = False):
     time_df = load_time()
     ctx = build_assistant_view(view, time_df)
     print("=" * 74)
-    print(" MoSPI AI ASSISTANT — KILLER DEMO (live LLM tool-calling on real data)")
+    print(" MoSPI LLM project-intelligence demo (live tool-calling on real data)")
     print("=" * 74)
     for q in DEMO_QUESTIONS:
         print(f"\nQ: {q}")

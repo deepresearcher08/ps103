@@ -1,0 +1,70 @@
+{
+  "title": "Cost c2020 AUC dip diagnosis",
+  "headline_delta_vs_baseline_c2020": {
+    "LR": 0.05,
+    "RF": -0.026,
+    "LGBM": -0.045
+  },
+  "per_model_deltas_by_cohort": {
+    "c2018": {
+      "LR": 0.233,
+      "RF": 0.116,
+      "LGBM": 0.102
+    },
+    "c2019": {
+      "LR": 0.139,
+      "RF": 0.022,
+      "LGBM": 0.002
+    },
+    "c2020": {
+      "LR": 0.05,
+      "RF": -0.026,
+      "LGBM": -0.045
+    }
+  },
+  "test_cohort_stats": {
+    "c2018": {
+      "n": 162,
+      "base_rate": 0.5617283950617284,
+      "elapsed_share_median": 1.1050000000000182,
+      "elapsed_share_iqr": [
+        0.7742857142857247,
+        1.4733333333333576
+      ],
+      "spend_pace_median": 0.42694494551395124,
+      "spend_pace_iqr": [
+        0.1472521143317077,
+        0.6368275326914679
+      ]
+    },
+    "c2019": {
+      "n": 249,
+      "base_rate": 0.37751004016064255,
+      "elapsed_share_median": 1.1050000000000182,
+      "elapsed_share_iqr": [
+        0.8550000000000182,
+        1.1400000000000243
+      ],
+      "spend_pace_median": 0.4019068375317603,
+      "spend_pace_iqr": [
+        0.19364150081211387,
+        0.5863043721504811
+      ]
+    },
+    "c2020": {
+      "n": 412,
+      "base_rate": 0.17718446601941748,
+      "elapsed_share_median": 0.806666666666691,
+      "elapsed_share_iqr": [
+        0.806666666666691,
+        1.1400000000000243
+      ],
+      "spend_pace_median": 0.2648019863623591,
+      "spend_pace_iqr": [
+        0.10749470638991776,
+        0.4481282542320789
+      ]
+    }
+  },
+  "verdict": "c2020 -0.026 is NOT a true skill reversal and NOT the classic censoring artifact. AUC is rank-based, so the test-cohort base-rate collapse (0.562 -> 0.378 -> 0.177) does not by itself tank the AUC. Per model, Logistic Regression IMPROVED at c2020 (+0.050): if elapsed_share were pure observation-window noise that corrupted every learner, LR would dip too. RF (-0.026) and LGBM (-0.045) instead overfit the compressed, low-variance pace signal in the youngest cohort (elapsed_share median 0.807 and IQR degenerate at the low end; spend_pace median 0.265 vs 0.43 on settled cohorts): a covariate shift toward a no-signal region makes the flexible models brittle. Headline = best-of-3; the best model at c2020 happens to be the one that was hurt most. Honest summary: pace helps a lot on settled cohorts (c2018 LR +0.23, RF/LGBM +0.10-0.12), plainly helps mid cohort (LR +0.14, RF/LGBM ~flat), and is a wash at c2020 (LR +0.05, RF -0.03, LGBM -0.05, within ~1-2 SE of zero on n=412). Report the 3-model range, not a single best-of-3 column."
+}

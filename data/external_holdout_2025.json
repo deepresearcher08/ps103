@@ -14,34 +14,34 @@
         "n_test": 207,
         "clf": {
           "auc_by_model": {
-            "Logistic Regression": 0.64,
-            "Random Forest": 0.597,
-            "LightGBM": 0.587
+            "Logistic Regression": 0.566,
+            "Random Forest": 0.617,
+            "LightGBM": 0.549
           },
-          "best": "Logistic Regression",
-          "auc": 0.64,
+          "best": "Random Forest",
+          "auc": 0.617,
           "test_base_rate": 0.353,
           "thr@0.5": {
-            "flagged": 205,
-            "precision": 0.356,
-            "recall": 1.0
+            "flagged": 191,
+            "precision": 0.372,
+            "recall": 0.973
           },
           "top20pct": {
             "top_pct": 0.2,
-            "recall@top": 0.37,
-            "lift": 1.85
+            "recall@top": 0.315,
+            "lift": 1.58
           }
         },
         "reg": {
           "best": "Random Forest",
-          "mae": 0.273,
+          "mae": 0.261,
           "mae_by_model": {
-            "Linear Regression": 0.393,
-            "Random Forest": 0.273,
-            "LightGBM": 0.292
+            "Linear Regression": 0.388,
+            "Random Forest": 0.261,
+            "LightGBM": 0.294
           },
           "naive_median_mae": 0.31,
-          "improvement_vs_naive_pct": 12.0
+          "improvement_vs_naive_pct": 15.9
         }
       },
       "time": {
@@ -49,17 +49,17 @@
         "n_test": 196,
         "clf": {
           "auc_by_model": {
-            "Logistic Regression": 0.704,
-            "Random Forest": 0.776,
-            "LightGBM": 0.806
+            "Logistic Regression": 0.746,
+            "Random Forest": 0.806,
+            "LightGBM": 0.807
           },
           "best": "LightGBM",
-          "auc": 0.806,
+          "auc": 0.807,
           "test_base_rate": 0.821,
           "thr@0.5": {
-            "flagged": 189,
-            "precision": 0.841,
-            "recall": 0.988
+            "flagged": 170,
+            "precision": 0.912,
+            "recall": 0.963
           },
           "top20pct": {
             "top_pct": 0.2,
@@ -69,9 +69,9 @@
         },
         "reg": {
           "best": "Random Forest",
-          "mae_months": 16.8,
+          "mae_months": 14.7,
           "naive_median_mae": 23.7,
-          "improvement_vs_naive_pct": 29.0,
+          "improvement_vs_naive_pct": 37.9,
           "test_n_delayed": 161
         }
       }
@@ -85,34 +85,34 @@
         "n_test": 288,
         "clf": {
           "auc_by_model": {
-            "Logistic Regression": 0.719,
-            "Random Forest": 0.686,
-            "LightGBM": 0.675
+            "Logistic Regression": 0.575,
+            "Random Forest": 0.681,
+            "LightGBM": 0.614
           },
-          "best": "Logistic Regression",
-          "auc": 0.719,
+          "best": "Random Forest",
+          "auc": 0.681,
           "test_base_rate": 0.319,
           "thr@0.5": {
-            "flagged": 287,
-            "precision": 0.321,
-            "recall": 1.0
+            "flagged": 262,
+            "precision": 0.347,
+            "recall": 0.989
           },
           "top20pct": {
             "top_pct": 0.2,
-            "recall@top": 0.446,
-            "lift": 2.23
+            "recall@top": 0.293,
+            "lift": 1.47
           }
         },
         "reg": {
-          "best": "Random Forest",
-          "mae": 0.217,
+          "best": "Linear Regression",
+          "mae": 0.21,
           "mae_by_model": {
-            "Linear Regression": 0.244,
-            "Random Forest": 0.217,
-            "LightGBM": 0.235
+            "Linear Regression": 0.21,
+            "Random Forest": 0.216,
+            "LightGBM": 0.243
           },
           "naive_median_mae": 0.262,
-          "improvement_vs_naive_pct": 17.2
+          "improvement_vs_naive_pct": 19.9
         }
       },
       "time": {
@@ -120,17 +120,17 @@
         "n_test": 244,
         "clf": {
           "auc_by_model": {
-            "Logistic Regression": 0.784,
-            "Random Forest": 0.81,
-            "LightGBM": 0.755
+            "Logistic Regression": 0.875,
+            "Random Forest": 0.848,
+            "LightGBM": 0.844
           },
-          "best": "Random Forest",
-          "auc": 0.81,
+          "best": "Logistic Regression",
+          "auc": 0.875,
           "test_base_rate": 0.828,
           "thr@0.5": {
-            "flagged": 238,
-            "precision": 0.845,
-            "recall": 0.995
+            "flagged": 225,
+            "precision": 0.88,
+            "recall": 0.98
           },
           "top20pct": {
             "top_pct": 0.2,
@@ -140,9 +140,9 @@
         },
         "reg": {
           "best": "Linear Regression",
-          "mae_months": 16.2,
+          "mae_months": 12.9,
           "naive_median_mae": 23.1,
-          "improvement_vs_naive_pct": 29.8,
+          "improvement_vs_naive_pct": 44.4,
           "test_n_delayed": 202
         }
       }
@@ -156,34 +156,34 @@
         "n_test": 450,
         "clf": {
           "auc_by_model": {
-            "Logistic Regression": 0.665,
-            "Random Forest": 0.635,
-            "LightGBM": 0.609
+            "Logistic Regression": 0.565,
+            "Random Forest": 0.655,
+            "LightGBM": 0.557
           },
-          "best": "Logistic Regression",
-          "auc": 0.665,
+          "best": "Random Forest",
+          "auc": 0.655,
           "test_base_rate": 0.247,
           "thr@0.5": {
-            "flagged": 422,
-            "precision": 0.244,
-            "recall": 0.928
+            "flagged": 418,
+            "precision": 0.256,
+            "recall": 0.964
           },
           "top20pct": {
             "top_pct": 0.2,
-            "recall@top": 0.432,
-            "lift": 2.16
+            "recall@top": 0.36,
+            "lift": 1.8
           }
         },
         "reg": {
-          "best": "LightGBM",
-          "mae": 0.193,
+          "best": "Linear Regression",
+          "mae": 0.172,
           "mae_by_model": {
-            "Linear Regression": 0.197,
-            "Random Forest": 0.208,
-            "LightGBM": 0.193
+            "Linear Regression": 0.172,
+            "Random Forest": 0.197,
+            "LightGBM": 0.184
           },
           "naive_median_mae": 0.203,
-          "improvement_vs_naive_pct": 4.9
+          "improvement_vs_naive_pct": 15.2
         }
       },
       "time": {
@@ -191,29 +191,29 @@
         "n_test": 364,
         "clf": {
           "auc_by_model": {
-            "Logistic Regression": 0.74,
-            "Random Forest": 0.732,
-            "LightGBM": 0.692
+            "Logistic Regression": 0.863,
+            "Random Forest": 0.813,
+            "LightGBM": 0.711
           },
           "best": "Logistic Regression",
-          "auc": 0.74,
+          "auc": 0.863,
           "test_base_rate": 0.799,
           "thr@0.5": {
-            "flagged": 364,
-            "precision": 0.799,
-            "recall": 1.0
+            "flagged": 338,
+            "precision": 0.855,
+            "recall": 0.993
           },
           "top20pct": {
             "top_pct": 0.2,
-            "recall@top": 0.234,
-            "lift": 1.17
+            "recall@top": 0.241,
+            "lift": 1.2
           }
         },
         "reg": {
-          "best": "Linear Regression",
-          "mae_months": 15.1,
+          "best": "Random Forest",
+          "mae_months": 10.8,
           "naive_median_mae": 23.1,
-          "improvement_vs_naive_pct": 34.5,
+          "improvement_vs_naive_pct": 53.1,
           "test_n_delayed": 291
         }
       }

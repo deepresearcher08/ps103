@@ -5,8 +5,10 @@ on projects approved up to a cutoff year and evaluating ONLY on projects approve
 1-2 years later (after the cutoff) — i.e. data the model never saw.
 
 LEAK-FREE discipline (same rules as predict.py):
-  - cost features: log original cost, expenditure ratio, log expenditure, sector rate
-  - time features: log original cost, expenditure ratio, planned duration, sector rate
+  - cost features: log original cost, expenditure ratio, log expenditure, sector rate,
+    revise_log (log1p sanctioned-cost growth already taken, decision-time base feature)
+  - time features: log original cost, expenditure ratio, planned duration, sector rate,
+    agency delay rate (OOF m-estimate by implementing agency, train-only)
   - the target-collinear `cost_overrun_pct` and observation-window (age) features
     are NEVER used.
   - sector rates are recomputed from TRAIN data only (m-estimate) — the pipeline's
@@ -26,6 +28,7 @@ Run:
 from __future__ import annotations
 
 import json
+import os
 import sys
 import warnings
 from pathlib import Path
@@ -111,12 +114,49 @@ def _encode_rate(groups, rates, overall):
     return out
 
 
+from src.pace import pace_features, detect_snap_year, attach_duration, join_approval
+
+_USE_PACE = os.environ.get("TEMP_PACE", "1") == "1"
+
+
+def _prep_pace(df):
+    """Ensure df carries approval_year + planned_duration_years, then add the
+    elapsed_share / spend_pace features at the row's own snapshot year.
+
+    The COST annexure table has no dates: approval_year and duration are joined
+    from the TIME table (sector|project_name key); unmatched rows stay NaN and
+    are imputed to the training median by the frame builders."""
+    if not _USE_PACE:
+        return df
+    df = df.copy()
+    if "approval_year" not in df.columns or df["approval_year"].notna().mean() == 0:
+        df = join_approval(df)
+    if "planned_duration_years" not in df.columns or df["planned_duration_years"].notna().mean() == 0:
+        df = attach_duration(df)
+    return pace_features(df, detect_snap_year(df))
+
+
 def _cost_frame(train, test, mode="full"):
+    train = _prep_pace(train)
+    test = _prep_pace(test)
+    es_med = float(pd.to_numeric(train["elapsed_share"], errors="coerce").median()) if "elapsed_share" in train.columns else 0.5
+    sp_med = float(pd.to_numeric(train["spend_pace"], errors="coerce").median()) if "spend_pace" in train.columns else 1.0
+
     def feats(df):
         orig = df["original_cost_cr"].clip(lower=0).to_numpy(dtype=float)
         exp = df["expenditure_cum_cr"].fillna(0).clip(lower=0).to_numpy(dtype=float)
+        geo_lat = pd.to_numeric(df.get("geo_latitude"), errors="coerce").fillna(21.1458).to_numpy(dtype=float)
+        geo_lon = pd.to_numeric(df.get("geo_longitude"), errors="coerce").fillna(79.0882).to_numpy(dtype=float)
+        es = pd.to_numeric(df.get("elapsed_share"), errors="coerce").fillna(es_med).to_numpy(dtype=float) if "elapsed_share" in df.columns else np.full(len(df), es_med)
+        sp = pd.to_numeric(df.get("spend_pace"), errors="coerce").fillna(sp_med).to_numpy(dtype=float) if "spend_pace" in df.columns else np.full(len(df), sp_med)
+        revised = pd.to_numeric(df.get("revised_cost_cr"), errors="coerce")
+        rev = np.where(np.isnan(revised.to_numpy(dtype=float)), orig,
+                       revised.to_numpy(dtype=float)) if revised is not None else orig
+        gain = np.clip(rev - orig, 0.0, None) / np.maximum(orig, 1e-9)
+        rev_log = np.log1p(gain)
         return {"log_original_cost": np.log1p(orig), "expenditure_ratio": exp / np.maximum(orig, 1e-9),
-                "log_expenditure": np.log1p(exp)}, orig, exp
+                "log_expenditure": np.log1p(exp), "geo_latitude": geo_lat, "geo_longitude": geo_lon,
+                "elapsed_share": es, "spend_pace": sp, "revise_log": rev_log}, orig, exp
 
     ft, orig_t, _ = feats(train)
     fy, _, _ = feats(test)
@@ -126,13 +166,19 @@ def _cost_frame(train, test, mode="full"):
     rates_r, overall_r = _train_only_rate(train["sector"].astype(str), train["overrun_ratio"],
                                           train["approval_year"], cutoff, mode=mode)
     Xtr = np.column_stack([ft["log_original_cost"], ft["expenditure_ratio"],
-                           ft["log_expenditure"], _encode_rate(train["sector"].astype(str), rates, overall)])
+                           ft["log_expenditure"], _encode_rate(train["sector"].astype(str), rates, overall),
+                           ft["geo_latitude"], ft["geo_longitude"], ft["elapsed_share"], ft["spend_pace"],
+                           ft["revise_log"]])
     Xte = np.column_stack([fy["log_original_cost"], fy["expenditure_ratio"],
-                           fy["log_expenditure"], _encode_rate(test["sector"].astype(str), rates, overall)])
+                           fy["log_expenditure"], _encode_rate(test["sector"].astype(str), rates, overall),
+                           fy["geo_latitude"], fy["geo_longitude"], fy["elapsed_share"], fy["spend_pace"],
+                           fy["revise_log"]])
     Xtr_r = np.column_stack([Xtr[:, 0], Xtr[:, 1], Xtr[:, 2],
-                             _encode_rate(train["sector"].astype(str), rates_r, overall_r)])
+                             _encode_rate(train["sector"].astype(str), rates_r, overall_r),
+                             Xtr[:, 4], Xtr[:, 5], Xtr[:, 6], Xtr[:, 7], Xtr[:, 8]])
     Xte_r = np.column_stack([Xte[:, 0], Xte[:, 1], Xte[:, 2],
-                             _encode_rate(test["sector"].astype(str), rates_r, overall_r)])
+                             _encode_rate(test["sector"].astype(str), rates_r, overall_r),
+                             Xte[:, 4], Xte[:, 5], Xte[:, 6], Xte[:, 7], Xte[:, 8]])
     mtr, mte = _macro_block(train), _macro_block(test)
     if mtr is not None and mte is not None:
         Xtr, Xte = np.column_stack([Xtr, mtr]), np.column_stack([Xte, mte])
@@ -141,6 +187,12 @@ def _cost_frame(train, test, mode="full"):
 
 
 def _time_frame(train, test, mode="full"):
+    from src.predict import _agency_from_name
+    train = _prep_pace(train)
+    test = _prep_pace(test)
+    es_med = float(pd.to_numeric(train["elapsed_share"], errors="coerce").median()) if "elapsed_share" in train.columns else 0.5
+    sp_med = float(pd.to_numeric(train["spend_pace"], errors="coerce").median()) if "spend_pace" in train.columns else 1.0
+
     def feats(df):
         orig = df["original_cost_cr"].clip(lower=0).to_numpy(dtype=float)
         exp = df["expenditure_cum_cr"].fillna(0).clip(lower=0).to_numpy(dtype=float)
@@ -149,18 +201,31 @@ def _time_frame(train, test, mode="full"):
             pdur = np.nan_to_num(pdur, nan=np.nanmedian(pdur))
         else:
             pdur = np.full(len(pdur), 5.0)
+        geo_lat = pd.to_numeric(df.get("geo_latitude"), errors="coerce").fillna(21.1458).to_numpy(dtype=float)
+        geo_lon = pd.to_numeric(df.get("geo_longitude"), errors="coerce").fillna(79.0882).to_numpy(dtype=float)
+        es = pd.to_numeric(df.get("elapsed_share"), errors="coerce").fillna(es_med).to_numpy(dtype=float) if "elapsed_share" in df.columns else np.full(len(df), es_med)
+        sp = pd.to_numeric(df.get("spend_pace"), errors="coerce").fillna(sp_med).to_numpy(dtype=float) if "spend_pace" in df.columns else np.full(len(df), sp_med)
         return {"log_original_cost": np.log1p(orig), "expenditure_ratio": exp / np.maximum(orig, 1e-9),
-                "planned_duration_yrs": pdur}, orig, exp
+                "planned_duration_yrs": pdur, "geo_latitude": geo_lat, "geo_longitude": geo_lon,
+                "elapsed_share": es, "spend_pace": sp}, orig, exp
 
     ft, _, _ = feats(train)
     fy, _, _ = feats(test)
     cutoff = int(train["approval_year"].max())
     rates, overall = _train_only_rate(train["sector"].astype(str), train["delayed"] > 0,
                                       train["approval_year"], cutoff, mode=mode)
+    ag_tr = train["project_name"].apply(_agency_from_name).fillna("UNKNOWN").astype(str)
+    ag_te = test["project_name"].apply(_agency_from_name).fillna("UNKNOWN").astype(str)
+    agrates, overall_a = _train_only_rate(ag_tr, train["delayed"] > 0,
+                                          train["approval_year"], cutoff, mode=mode)
     Xtr = np.column_stack([ft["log_original_cost"], ft["expenditure_ratio"],
-                           ft["planned_duration_yrs"], _encode_rate(train["sector"].astype(str), rates, overall)])
+                           ft["planned_duration_yrs"], _encode_rate(train["sector"].astype(str), rates, overall),
+                           ft["geo_latitude"], ft["geo_longitude"], ft["elapsed_share"], ft["spend_pace"],
+                           _encode_rate(ag_tr, agrates, overall_a)])
     Xte = np.column_stack([fy["log_original_cost"], fy["expenditure_ratio"],
-                           fy["planned_duration_yrs"], _encode_rate(test["sector"].astype(str), rates, overall)])
+                           fy["planned_duration_yrs"], _encode_rate(test["sector"].astype(str), rates, overall),
+                           fy["geo_latitude"], fy["geo_longitude"], fy["elapsed_share"], fy["spend_pace"],
+                           _encode_rate(ag_te, agrates, overall_a)])
     mtr, mte = _macro_block(train), _macro_block(test)
     if mtr is not None and mte is not None:
         Xtr, Xte = np.column_stack([Xtr, mtr]), np.column_stack([Xte, mte])
@@ -343,6 +408,13 @@ def _eval_cutoff(cutoff: int, cost: pd.DataFrame, time: pd.DataFrame, mode: str 
                                                  f"{(time[time['approval_year']==cutoff+2]['delayed']>0).mean():.2f} -> {cutoff+3}: "
                                                  f"{(nxt['delayed']>0).mean():.2f} (older approvals, watched longer, look worse).")
     return report
+
+
+def _parse_cutoffs(argv, flag, default):
+    i = argv.index(flag) + 1
+    if i < len(argv) and argv[i][0].isdigit():
+        return tuple(int(x) for x in argv[i].split(","))
+    return default
 
 
 def run(cutoffs=(2018, 2019, 2020), modes=("full", "decay", "rolling")) -> dict:
@@ -1089,20 +1161,17 @@ if __name__ == "__main__":
         _print_macro_ab(res)
         sys.exit(0)
     if "--survival" in sys.argv:
-        cutoffs = tuple(int(x) for x in sys.argv[sys.argv.index("--survival") + 1].split(",")) \
-            if sys.argv[sys.argv.index("--survival") + 1][0].isdigit() else (2017, 2018, 2019)
+        cutoffs = _parse_cutoffs(sys.argv, "--survival", (2017, 2018, 2019))
         res = run_survival(cutoffs)
         _print_survival(res)
         sys.exit(0)
     if "--augment" in sys.argv:
-        cutoffs = tuple(int(x) for x in sys.argv[sys.argv.index("--augment") + 1].split(",")) \
-            if sys.argv[sys.argv.index("--augment") + 1][0].isdigit() else (2017, 2018, 2019)
+        cutoffs = _parse_cutoffs(sys.argv, "--augment", (2017, 2018, 2019))
         res = run_augment(cutoffs)
         _print_augment(res)
         sys.exit(0)
     if "--external" in sys.argv:
-        cutoffs = tuple(int(x) for x in sys.argv[sys.argv.index("--external") + 1].split(",")) \
-            if sys.argv[sys.argv.index("--external") + 1][0].isdigit() else (2017, 2018, 2019)
+        cutoffs = _parse_cutoffs(sys.argv, "--external", (2017, 2018, 2019))
         res = run_external(cutoffs)
         _print_external(res)
         sys.exit(0)

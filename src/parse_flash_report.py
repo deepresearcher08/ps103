@@ -132,7 +132,7 @@ def parse_annexure_viii(pdf_path: Path) -> list[dict]:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    pdf = Path(r"C:\Users\soumy\AppData\Local\Temp\opencode\pdfs\FlashReport_May_2024.pdf")
+    pdf = Path(__file__).resolve().parents[1] / "data/raw/FlashReport_May_2024.pdf"
     data = parse_annexure_viii(pdf)
     import pandas as pd
 

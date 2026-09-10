@@ -281,35 +281,35 @@
         "n_test": 163,
         "clf": {
           "auc_by_model": {
-            "Logistic Regression": 0.7123392529087569,
-            "Random Forest": 0.6893753827311697,
-            "LightGBM": 0.6338028169014085
+            "Logistic Regression": 0.6606705450091855,
+            "Random Forest": 0.769748928352725,
+            "LightGBM": 0.7757195345988976
           },
-          "best": "Logistic Regression",
-          "auc": 0.712,
+          "best": "LightGBM",
+          "auc": 0.776,
           "test_base_rate": 0.564,
           "thr@0.5": {
-            "flagged": 163,
-            "precision": 0.564,
-            "recall": 1.0
+            "flagged": 123,
+            "precision": 0.715,
+            "recall": 0.957
           },
           "top20pct": {
             "top_pct": 0.2,
-            "recall@top": 0.272,
-            "lift": 1.36
+            "recall@top": 0.25,
+            "lift": 1.25
           }
         },
         "reg": {
           "best": "Random Forest",
-          "mae": 0.227,
+          "mae": 0.237,
           "mae_by_model": {
-            "Linear Regression": 0.244,
-            "Random Forest": 0.227,
-            "LightGBM": 0.267
+            "Linear Regression": 0.245,
+            "Random Forest": 0.237,
+            "LightGBM": 0.255
           },
           "naive_median_mae": 0.26,
-          "improvement_vs_naive_pct": 12.9,
-          "sample_signed_mae": 0.246
+          "improvement_vs_naive_pct": 8.8,
+          "sample_signed_mae": 0.26
         }
       },
       "time": {
@@ -317,29 +317,29 @@
         "n_test": 381,
         "clf": {
           "auc_by_model": {
-            "Logistic Regression": 0.8023975095010916,
-            "Random Forest": 0.7599660386512492,
-            "LightGBM": 0.7250950109161478
+            "Logistic Regression": 0.768638311635805,
+            "Random Forest": 0.7835570469798658,
+            "LightGBM": 0.7674051912347377
           },
-          "best": "Logistic Regression",
-          "auc": 0.802,
+          "best": "Random Forest",
+          "auc": 0.784,
           "test_base_rate": 0.782,
           "thr@0.5": {
-            "flagged": 381,
-            "precision": 0.782,
+            "flagged": 368,
+            "precision": 0.81,
             "recall": 1.0
           },
           "top20pct": {
             "top_pct": 0.2,
-            "recall@top": 0.248,
-            "lift": 1.24
+            "recall@top": 0.228,
+            "lift": 1.14
           }
         },
         "reg": {
-          "best": "Random Forest",
-          "mae_months": 20.6,
+          "best": "Linear Regression",
+          "mae_months": 20.9,
           "naive_median_mae": 28.9,
-          "improvement_vs_naive_pct": 28.8,
+          "improvement_vs_naive_pct": 27.9,
           "test_n_delayed": 298
         }
       },
@@ -354,35 +354,35 @@
         "n_test": 251,
         "clf": {
           "auc_by_model": {
-            "Logistic Regression": 0.6884615384615385,
-            "Random Forest": 0.6749325236167342,
-            "LightGBM": 0.5960188933873145
+            "Logistic Regression": 0.7024966261808369,
+            "Random Forest": 0.8029352226720647,
+            "LightGBM": 0.8014170040485831
           },
-          "best": "Logistic Regression",
-          "auc": 0.688,
+          "best": "Random Forest",
+          "auc": 0.803,
           "test_base_rate": 0.378,
           "thr@0.5": {
-            "flagged": 249,
-            "precision": 0.378,
-            "recall": 0.989
+            "flagged": 231,
+            "precision": 0.411,
+            "recall": 1.0
           },
           "top20pct": {
             "top_pct": 0.2,
-            "recall@top": 0.316,
-            "lift": 1.58
+            "recall@top": 0.358,
+            "lift": 1.79
           }
         },
         "reg": {
           "best": "Linear Regression",
-          "mae": 0.168,
+          "mae": 0.167,
           "mae_by_model": {
-            "Linear Regression": 0.168,
-            "Random Forest": 0.178,
-            "LightGBM": 0.194
+            "Linear Regression": 0.167,
+            "Random Forest": 0.182,
+            "LightGBM": 0.189
           },
           "naive_median_mae": 0.2,
-          "improvement_vs_naive_pct": 16.3,
-          "sample_signed_mae": 0.165
+          "improvement_vs_naive_pct": 16.6,
+          "sample_signed_mae": 0.162
         }
       },
       "time": {
@@ -390,22 +390,22 @@
         "n_test": 527,
         "clf": {
           "auc_by_model": {
-            "Logistic Regression": 0.7480934623395821,
-            "Random Forest": 0.7095679634482296,
-            "LightGBM": 0.6504568971309548
+            "Logistic Regression": 0.7466992541826244,
+            "Random Forest": 0.6746203722367803,
+            "LightGBM": 0.777842168917557
           },
-          "best": "Logistic Regression",
-          "auc": 0.748,
+          "best": "LightGBM",
+          "auc": 0.778,
           "test_base_rate": 0.689,
           "thr@0.5": {
-            "flagged": 526,
-            "precision": 0.69,
+            "flagged": 500,
+            "precision": 0.726,
             "recall": 1.0
           },
           "top20pct": {
             "top_pct": 0.2,
-            "recall@top": 0.253,
-            "lift": 1.27
+            "recall@top": 0.259,
+            "lift": 1.29
           }
         },
         "reg": {
@@ -427,35 +427,35 @@
         "n_test": 413,
         "clf": {
           "auc_by_model": {
-            "Logistic Regression": 0.6055197421434326,
-            "Random Forest": 0.6329170024174052,
-            "LightGBM": 0.6164786462530218
+            "Logistic Regression": 0.6215149073327961,
+            "Random Forest": 0.7131345688960514,
+            "LightGBM": 0.7094480257856566
           },
           "best": "Random Forest",
-          "auc": 0.633,
+          "auc": 0.713,
           "test_base_rate": 0.177,
           "thr@0.5": {
-            "flagged": 297,
-            "precision": 0.192,
-            "recall": 0.781
+            "flagged": 179,
+            "precision": 0.268,
+            "recall": 0.658
           },
           "top20pct": {
             "top_pct": 0.2,
-            "recall@top": 0.384,
-            "lift": 1.92
+            "recall@top": 0.411,
+            "lift": 2.05
           }
         },
         "reg": {
           "best": "Linear Regression",
-          "mae": 0.135,
+          "mae": 0.134,
           "mae_by_model": {
-            "Linear Regression": 0.135,
-            "Random Forest": 0.174,
-            "LightGBM": 0.164
+            "Linear Regression": 0.134,
+            "Random Forest": 0.163,
+            "LightGBM": 0.149
           },
           "naive_median_mae": 0.148,
-          "improvement_vs_naive_pct": 8.9,
-          "sample_signed_mae": 0.122
+          "improvement_vs_naive_pct": 9.8,
+          "sample_signed_mae": 0.121
         }
       },
       "time": {
@@ -463,29 +463,29 @@
         "n_test": 606,
         "clf": {
           "auc_by_model": {
-            "Logistic Regression": 0.7400033517680576,
-            "Random Forest": 0.7055136584548349,
-            "LightGBM": 0.678654823752863
+            "Logistic Regression": 0.7430981509412882,
+            "Random Forest": 0.8612647338137533,
+            "LightGBM": 0.8641919445841014
           },
-          "best": "Logistic Regression",
-          "auc": 0.74,
+          "best": "LightGBM",
+          "auc": 0.864,
           "test_base_rate": 0.421,
           "thr@0.5": {
-            "flagged": 604,
-            "precision": 0.422,
+            "flagged": 544,
+            "precision": 0.469,
             "recall": 1.0
           },
           "top20pct": {
             "top_pct": 0.2,
-            "recall@top": 0.345,
-            "lift": 1.73
+            "recall@top": 0.408,
+            "lift": 2.04
           }
         },
         "reg": {
           "best": "Linear Regression",
-          "mae_months": 14.4,
+          "mae_months": 14.5,
           "naive_median_mae": 21.4,
-          "improvement_vs_naive_pct": 32.9,
+          "improvement_vs_naive_pct": 32.0,
           "test_n_delayed": 253
         }
       },
@@ -503,35 +503,35 @@
           "n_test": 163,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.7123392529087569,
-              "Random Forest": 0.6893753827311697,
-              "LightGBM": 0.6338028169014085
+              "Logistic Regression": 0.6606705450091855,
+              "Random Forest": 0.769748928352725,
+              "LightGBM": 0.7757195345988976
             },
-            "best": "Logistic Regression",
-            "auc": 0.712,
+            "best": "LightGBM",
+            "auc": 0.776,
             "test_base_rate": 0.564,
             "thr@0.5": {
-              "flagged": 163,
-              "precision": 0.564,
-              "recall": 1.0
+              "flagged": 123,
+              "precision": 0.715,
+              "recall": 0.957
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.272,
-              "lift": 1.36
+              "recall@top": 0.25,
+              "lift": 1.25
             }
           },
           "reg": {
             "best": "Random Forest",
-            "mae": 0.227,
+            "mae": 0.237,
             "mae_by_model": {
-              "Linear Regression": 0.244,
-              "Random Forest": 0.227,
-              "LightGBM": 0.267
+              "Linear Regression": 0.245,
+              "Random Forest": 0.237,
+              "LightGBM": 0.255
             },
             "naive_median_mae": 0.26,
-            "improvement_vs_naive_pct": 12.9,
-            "sample_signed_mae": 0.246
+            "improvement_vs_naive_pct": 8.8,
+            "sample_signed_mae": 0.26
           }
         },
         "time": {
@@ -539,29 +539,29 @@
           "n_test": 381,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.8023975095010916,
-              "Random Forest": 0.7599660386512492,
-              "LightGBM": 0.7250950109161478
+              "Logistic Regression": 0.768638311635805,
+              "Random Forest": 0.7835570469798658,
+              "LightGBM": 0.7674051912347377
             },
-            "best": "Logistic Regression",
-            "auc": 0.802,
+            "best": "Random Forest",
+            "auc": 0.784,
             "test_base_rate": 0.782,
             "thr@0.5": {
-              "flagged": 381,
-              "precision": 0.782,
+              "flagged": 368,
+              "precision": 0.81,
               "recall": 1.0
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.248,
-              "lift": 1.24
+              "recall@top": 0.228,
+              "lift": 1.14
             }
           },
           "reg": {
-            "best": "Random Forest",
-            "mae_months": 20.6,
+            "best": "Linear Regression",
+            "mae_months": 20.9,
             "naive_median_mae": 28.9,
-            "improvement_vs_naive_pct": 28.8,
+            "improvement_vs_naive_pct": 27.9,
             "test_n_delayed": 298
           }
         },
@@ -576,35 +576,35 @@
           "n_test": 251,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.6884615384615385,
-              "Random Forest": 0.6749325236167342,
-              "LightGBM": 0.5960188933873145
+              "Logistic Regression": 0.7024966261808369,
+              "Random Forest": 0.8029352226720647,
+              "LightGBM": 0.8014170040485831
             },
-            "best": "Logistic Regression",
-            "auc": 0.688,
+            "best": "Random Forest",
+            "auc": 0.803,
             "test_base_rate": 0.378,
             "thr@0.5": {
-              "flagged": 249,
-              "precision": 0.378,
-              "recall": 0.989
+              "flagged": 231,
+              "precision": 0.411,
+              "recall": 1.0
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.316,
-              "lift": 1.58
+              "recall@top": 0.358,
+              "lift": 1.79
             }
           },
           "reg": {
             "best": "Linear Regression",
-            "mae": 0.168,
+            "mae": 0.167,
             "mae_by_model": {
-              "Linear Regression": 0.168,
-              "Random Forest": 0.178,
-              "LightGBM": 0.194
+              "Linear Regression": 0.167,
+              "Random Forest": 0.182,
+              "LightGBM": 0.189
             },
             "naive_median_mae": 0.2,
-            "improvement_vs_naive_pct": 16.3,
-            "sample_signed_mae": 0.165
+            "improvement_vs_naive_pct": 16.6,
+            "sample_signed_mae": 0.162
           }
         },
         "time": {
@@ -612,22 +612,22 @@
           "n_test": 527,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.7480934623395821,
-              "Random Forest": 0.7095679634482296,
-              "LightGBM": 0.6504568971309548
+              "Logistic Regression": 0.7466992541826244,
+              "Random Forest": 0.6746203722367803,
+              "LightGBM": 0.777842168917557
             },
-            "best": "Logistic Regression",
-            "auc": 0.748,
+            "best": "LightGBM",
+            "auc": 0.778,
             "test_base_rate": 0.689,
             "thr@0.5": {
-              "flagged": 526,
-              "precision": 0.69,
+              "flagged": 500,
+              "precision": 0.726,
               "recall": 1.0
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.253,
-              "lift": 1.27
+              "recall@top": 0.259,
+              "lift": 1.29
             }
           },
           "reg": {
@@ -649,35 +649,35 @@
           "n_test": 413,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.6055197421434326,
-              "Random Forest": 0.6329170024174052,
-              "LightGBM": 0.6164786462530218
+              "Logistic Regression": 0.6215149073327961,
+              "Random Forest": 0.7131345688960514,
+              "LightGBM": 0.7094480257856566
             },
             "best": "Random Forest",
-            "auc": 0.633,
+            "auc": 0.713,
             "test_base_rate": 0.177,
             "thr@0.5": {
-              "flagged": 297,
-              "precision": 0.192,
-              "recall": 0.781
+              "flagged": 179,
+              "precision": 0.268,
+              "recall": 0.658
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.384,
-              "lift": 1.92
+              "recall@top": 0.411,
+              "lift": 2.05
             }
           },
           "reg": {
             "best": "Linear Regression",
-            "mae": 0.135,
+            "mae": 0.134,
             "mae_by_model": {
-              "Linear Regression": 0.135,
-              "Random Forest": 0.174,
-              "LightGBM": 0.164
+              "Linear Regression": 0.134,
+              "Random Forest": 0.163,
+              "LightGBM": 0.149
             },
             "naive_median_mae": 0.148,
-            "improvement_vs_naive_pct": 8.9,
-            "sample_signed_mae": 0.122
+            "improvement_vs_naive_pct": 9.8,
+            "sample_signed_mae": 0.121
           }
         },
         "time": {
@@ -685,29 +685,29 @@
           "n_test": 606,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.7400033517680576,
-              "Random Forest": 0.7055136584548349,
-              "LightGBM": 0.678654823752863
+              "Logistic Regression": 0.7430981509412882,
+              "Random Forest": 0.8612647338137533,
+              "LightGBM": 0.8641919445841014
             },
-            "best": "Logistic Regression",
-            "auc": 0.74,
+            "best": "LightGBM",
+            "auc": 0.864,
             "test_base_rate": 0.421,
             "thr@0.5": {
-              "flagged": 604,
-              "precision": 0.422,
+              "flagged": 544,
+              "precision": 0.469,
               "recall": 1.0
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.345,
-              "lift": 1.73
+              "recall@top": 0.408,
+              "lift": 2.04
             }
           },
           "reg": {
             "best": "Linear Regression",
-            "mae_months": 14.4,
+            "mae_months": 14.5,
             "naive_median_mae": 21.4,
-            "improvement_vs_naive_pct": 32.9,
+            "improvement_vs_naive_pct": 32.0,
             "test_n_delayed": 253
           }
         },
@@ -724,35 +724,35 @@
           "n_test": 163,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.7143294549908145,
-              "Random Forest": 0.6901408450704226,
-              "LightGBM": 0.6509491733006735
+              "Logistic Regression": 0.6624311083894673,
+              "Random Forest": 0.7686772810777709,
+              "LightGBM": 0.7689834660134722
             },
-            "best": "Logistic Regression",
-            "auc": 0.714,
+            "best": "LightGBM",
+            "auc": 0.769,
             "test_base_rate": 0.564,
             "thr@0.5": {
-              "flagged": 163,
-              "precision": 0.564,
-              "recall": 1.0
+              "flagged": 124,
+              "precision": 0.71,
+              "recall": 0.957
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.272,
-              "lift": 1.36
+              "recall@top": 0.239,
+              "lift": 1.2
             }
           },
           "reg": {
             "best": "Random Forest",
-            "mae": 0.226,
+            "mae": 0.234,
             "mae_by_model": {
-              "Linear Regression": 0.248,
-              "Random Forest": 0.226,
-              "LightGBM": 0.269
+              "Linear Regression": 0.25,
+              "Random Forest": 0.234,
+              "LightGBM": 0.256
             },
             "naive_median_mae": 0.26,
-            "improvement_vs_naive_pct": 13.2,
-            "sample_signed_mae": 0.246
+            "improvement_vs_naive_pct": 10.0,
+            "sample_signed_mae": 0.259
           }
         },
         "time": {
@@ -760,29 +760,29 @@
           "n_test": 381,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.8041764372927953,
-              "Random Forest": 0.7609767930783538,
-              "LightGBM": 0.7460176275572088
+              "Logistic Regression": 0.770053367833751,
+              "Random Forest": 0.7805652138756367,
+              "LightGBM": 0.7715088542087815
             },
-            "best": "Logistic Regression",
-            "auc": 0.804,
+            "best": "Random Forest",
+            "auc": 0.781,
             "test_base_rate": 0.782,
             "thr@0.5": {
-              "flagged": 381,
-              "precision": 0.782,
+              "flagged": 367,
+              "precision": 0.812,
               "recall": 1.0
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.248,
-              "lift": 1.24
+              "recall@top": 0.225,
+              "lift": 1.12
             }
           },
           "reg": {
-            "best": "Random Forest",
-            "mae_months": 20.6,
+            "best": "Linear Regression",
+            "mae_months": 20.9,
             "naive_median_mae": 28.9,
-            "improvement_vs_naive_pct": 28.8,
+            "improvement_vs_naive_pct": 27.9,
             "test_n_delayed": 298
           }
         },
@@ -797,35 +797,35 @@
           "n_test": 251,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.6898110661268556,
-              "Random Forest": 0.6764170040485831,
-              "LightGBM": 0.6301282051282051
+              "Logistic Regression": 0.7046221322537113,
+              "Random Forest": 0.8079959514170041,
+              "LightGBM": 0.8180836707152497
             },
-            "best": "Logistic Regression",
-            "auc": 0.69,
+            "best": "LightGBM",
+            "auc": 0.818,
             "test_base_rate": 0.378,
             "thr@0.5": {
-              "flagged": 249,
-              "precision": 0.378,
-              "recall": 0.989
+              "flagged": 187,
+              "precision": 0.487,
+              "recall": 0.958
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.316,
-              "lift": 1.58
+              "recall@top": 0.389,
+              "lift": 1.95
             }
           },
           "reg": {
             "best": "Random Forest",
-            "mae": 0.179,
+            "mae": 0.181,
             "mae_by_model": {
-              "Linear Regression": 0.185,
-              "Random Forest": 0.179,
-              "LightGBM": 0.197
+              "Linear Regression": 0.182,
+              "Random Forest": 0.181,
+              "LightGBM": 0.189
             },
             "naive_median_mae": 0.2,
-            "improvement_vs_naive_pct": 10.4,
-            "sample_signed_mae": 0.217
+            "improvement_vs_naive_pct": 9.5,
+            "sample_signed_mae": 0.216
           }
         },
         "time": {
@@ -833,22 +833,22 @@
           "n_test": 527,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.7478246993213735,
-              "Random Forest": 0.6992121884028757,
-              "LightGBM": 0.6542699724517906
+              "Logistic Regression": 0.7443643754619365,
+              "Random Forest": 0.673016192971847,
+              "LightGBM": 0.7880887589867634
             },
-            "best": "Logistic Regression",
-            "auc": 0.748,
+            "best": "LightGBM",
+            "auc": 0.788,
             "test_base_rate": 0.689,
             "thr@0.5": {
-              "flagged": 526,
-              "precision": 0.69,
+              "flagged": 501,
+              "precision": 0.725,
               "recall": 1.0
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.251,
-              "lift": 1.25
+              "recall@top": 0.262,
+              "lift": 1.31
             }
           },
           "reg": {
@@ -870,35 +870,35 @@
           "n_test": 413,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.600805801772764,
-              "Random Forest": 0.6301168412570507,
-              "LightGBM": 0.629572925060435
+              "Logistic Regression": 0.6190975020145044,
+              "Random Forest": 0.7128525382755843,
+              "LightGBM": 0.708078162771958
             },
             "best": "Random Forest",
-            "auc": 0.63,
+            "auc": 0.713,
             "test_base_rate": 0.177,
             "thr@0.5": {
-              "flagged": 296,
-              "precision": 0.196,
-              "recall": 0.795
+              "flagged": 179,
+              "precision": 0.268,
+              "recall": 0.658
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.37,
-              "lift": 1.85
+              "recall@top": 0.411,
+              "lift": 2.05
             }
           },
           "reg": {
             "best": "Linear Regression",
-            "mae": 0.143,
+            "mae": 0.141,
             "mae_by_model": {
-              "Linear Regression": 0.143,
-              "Random Forest": 0.172,
-              "LightGBM": 0.16
+              "Linear Regression": 0.141,
+              "Random Forest": 0.16,
+              "LightGBM": 0.149
             },
             "naive_median_mae": 0.148,
-            "improvement_vs_naive_pct": 3.5,
-            "sample_signed_mae": 0.138
+            "improvement_vs_naive_pct": 5.0,
+            "sample_signed_mae": 0.135
           }
         },
         "time": {
@@ -906,29 +906,29 @@
           "n_test": 606,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.7382269146975029,
-              "Random Forest": 0.7019049215127646,
-              "LightGBM": 0.6697447069996089
+              "Logistic Regression": 0.7413999217920787,
+              "Random Forest": 0.8572649572649573,
+              "LightGBM": 0.8656332048488912
             },
-            "best": "Logistic Regression",
-            "auc": 0.738,
+            "best": "LightGBM",
+            "auc": 0.866,
             "test_base_rate": 0.421,
             "thr@0.5": {
-              "flagged": 603,
-              "precision": 0.421,
-              "recall": 0.996
+              "flagged": 540,
+              "precision": 0.472,
+              "recall": 1.0
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.341,
-              "lift": 1.71
+              "recall@top": 0.408,
+              "lift": 2.04
             }
           },
           "reg": {
             "best": "Linear Regression",
-            "mae_months": 14.4,
+            "mae_months": 14.5,
             "naive_median_mae": 21.4,
-            "improvement_vs_naive_pct": 32.9,
+            "improvement_vs_naive_pct": 32.0,
             "test_n_delayed": 253
           }
         },
@@ -945,17 +945,17 @@
           "n_test": 163,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.7132578077158604,
-              "Random Forest": 0.6864666258420085,
-              "LightGBM": 0.6523270055113288
+              "Logistic Regression": 0.6624311083894672,
+              "Random Forest": 0.7680649112063687,
+              "LightGBM": 0.760257195345989
             },
-            "best": "Logistic Regression",
-            "auc": 0.713,
+            "best": "Random Forest",
+            "auc": 0.768,
             "test_base_rate": 0.564,
             "thr@0.5": {
-              "flagged": 163,
-              "precision": 0.564,
-              "recall": 1.0
+              "flagged": 141,
+              "precision": 0.638,
+              "recall": 0.978
             },
             "top20pct": {
               "top_pct": 0.2,
@@ -965,15 +965,15 @@
           },
           "reg": {
             "best": "Random Forest",
-            "mae": 0.224,
+            "mae": 0.229,
             "mae_by_model": {
-              "Linear Regression": 0.264,
-              "Random Forest": 0.224,
-              "LightGBM": 0.265
+              "Linear Regression": 0.267,
+              "Random Forest": 0.229,
+              "LightGBM": 0.256
             },
             "naive_median_mae": 0.26,
-            "improvement_vs_naive_pct": 14.1,
-            "sample_signed_mae": 0.252
+            "improvement_vs_naive_pct": 12.2,
+            "sample_signed_mae": 0.258
           }
         },
         "time": {
@@ -981,29 +981,29 @@
           "n_test": 381,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.8039742864073746,
-              "Random Forest": 0.7655049729117813,
-              "LightGBM": 0.7433290207811111
+              "Logistic Regression": 0.7697703565941618,
+              "Random Forest": 0.7793927387401958,
+              "LightGBM": 0.7705991752243875
             },
-            "best": "Logistic Regression",
-            "auc": 0.804,
+            "best": "Random Forest",
+            "auc": 0.779,
             "test_base_rate": 0.782,
             "thr@0.5": {
-              "flagged": 381,
-              "precision": 0.782,
+              "flagged": 367,
+              "precision": 0.812,
               "recall": 1.0
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.248,
-              "lift": 1.24
+              "recall@top": 0.225,
+              "lift": 1.12
             }
           },
           "reg": {
-            "best": "Random Forest",
-            "mae_months": 20.6,
+            "best": "Linear Regression",
+            "mae_months": 20.9,
             "naive_median_mae": 28.9,
-            "improvement_vs_naive_pct": 28.8,
+            "improvement_vs_naive_pct": 27.9,
             "test_n_delayed": 298
           }
         },
@@ -1018,35 +1018,35 @@
           "n_test": 251,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.6889338731443995,
-              "Random Forest": 0.6752361673414305,
-              "LightGBM": 0.6000674763832659
+              "Logistic Regression": 0.7037112010796222,
+              "Random Forest": 0.8073886639676113,
+              "LightGBM": 0.8110661268556005
             },
-            "best": "Logistic Regression",
-            "auc": 0.689,
+            "best": "LightGBM",
+            "auc": 0.811,
             "test_base_rate": 0.378,
             "thr@0.5": {
-              "flagged": 250,
-              "precision": 0.38,
-              "recall": 1.0
+              "flagged": 192,
+              "precision": 0.458,
+              "recall": 0.926
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.316,
-              "lift": 1.58
+              "recall@top": 0.389,
+              "lift": 1.95
             }
           },
           "reg": {
             "best": "Random Forest",
-            "mae": 0.184,
+            "mae": 0.188,
             "mae_by_model": {
-              "Linear Regression": 0.219,
-              "Random Forest": 0.184,
-              "LightGBM": 0.196
+              "Linear Regression": 0.214,
+              "Random Forest": 0.188,
+              "LightGBM": 0.192
             },
             "naive_median_mae": 0.2,
-            "improvement_vs_naive_pct": 8.3,
-            "sample_signed_mae": 0.221
+            "improvement_vs_naive_pct": 6.1,
+            "sample_signed_mae": 0.224
           }
         },
         "time": {
@@ -1054,22 +1054,22 @@
           "n_test": 527,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.7472535779076799,
-              "Random Forest": 0.7017570382315393,
-              "LightGBM": 0.6425955788483505
+              "Logistic Regression": 0.7434069072095679,
+              "Random Forest": 0.66526405966539,
+              "LightGBM": 0.791817845864409
             },
-            "best": "Logistic Regression",
-            "auc": 0.747,
+            "best": "LightGBM",
+            "auc": 0.792,
             "test_base_rate": 0.689,
             "thr@0.5": {
-              "flagged": 526,
-              "precision": 0.69,
+              "flagged": 501,
+              "precision": 0.725,
               "recall": 1.0
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.251,
-              "lift": 1.25
+              "recall@top": 0.262,
+              "lift": 1.31
             }
           },
           "reg": {
@@ -1091,35 +1091,35 @@
           "n_test": 413,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.6005640612409346,
-              "Random Forest": 0.6280217566478645,
-              "LightGBM": 0.6278001611603545
+              "Logistic Regression": 0.6176470588235293,
+              "Random Forest": 0.7115229653505236,
+              "LightGBM": 0.7087228041901691
             },
             "best": "Random Forest",
-            "auc": 0.628,
+            "auc": 0.712,
             "test_base_rate": 0.177,
             "thr@0.5": {
-              "flagged": 300,
-              "precision": 0.193,
-              "recall": 0.795
+              "flagged": 179,
+              "precision": 0.268,
+              "recall": 0.658
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.356,
-              "lift": 1.78
+              "recall@top": 0.411,
+              "lift": 2.05
             }
           },
           "reg": {
             "best": "Linear Regression",
-            "mae": 0.156,
+            "mae": 0.152,
             "mae_by_model": {
-              "Linear Regression": 0.156,
-              "Random Forest": 0.173,
-              "LightGBM": 0.16
+              "Linear Regression": 0.152,
+              "Random Forest": 0.163,
+              "LightGBM": 0.164
             },
             "naive_median_mae": 0.148,
-            "improvement_vs_naive_pct": -5.0,
-            "sample_signed_mae": 0.156
+            "improvement_vs_naive_pct": -2.7,
+            "sample_signed_mae": 0.152
           }
         },
         "time": {
@@ -1127,29 +1127,29 @@
           "n_test": 606,
           "clf": {
             "auc_by_model": {
-              "Logistic Regression": 0.7368862074744428,
-              "Random Forest": 0.700675939891626,
-              "LightGBM": 0.6663985252220547
+              "Logistic Regression": 0.7399363164069046,
+              "Random Forest": 0.8591754650578179,
+              "LightGBM": 0.8588961510530138
             },
-            "best": "Logistic Regression",
-            "auc": 0.737,
+            "best": "Random Forest",
+            "auc": 0.859,
             "test_base_rate": 0.421,
             "thr@0.5": {
-              "flagged": 604,
-              "precision": 0.422,
+              "flagged": 566,
+              "precision": 0.451,
               "recall": 1.0
             },
             "top20pct": {
               "top_pct": 0.2,
-              "recall@top": 0.341,
-              "lift": 1.71
+              "recall@top": 0.38,
+              "lift": 1.9
             }
           },
           "reg": {
             "best": "Linear Regression",
-            "mae_months": 14.4,
+            "mae_months": 14.5,
             "naive_median_mae": 21.4,
-            "improvement_vs_naive_pct": 32.9,
+            "improvement_vs_naive_pct": 32.0,
             "test_n_delayed": 253
           }
         },
@@ -1162,46 +1162,46 @@
       {
         "cutoff": 2018,
         "test_window": "2019-2020",
-        "full": 0.802,
-        "decay": 0.804,
-        "rolling": 0.804
+        "full": 0.784,
+        "decay": 0.781,
+        "rolling": 0.779
       },
       {
         "cutoff": 2019,
         "test_window": "2020-2021",
-        "full": 0.748,
-        "decay": 0.748,
-        "rolling": 0.747
+        "full": 0.778,
+        "decay": 0.788,
+        "rolling": 0.792
       },
       {
         "cutoff": 2020,
         "test_window": "2021-2022",
-        "full": 0.74,
-        "decay": 0.738,
-        "rolling": 0.737
+        "full": 0.864,
+        "decay": 0.866,
+        "rolling": 0.859
       }
     ],
     "cost": [
       {
         "cutoff": 2018,
         "test_window": "2019-2020",
-        "full": 0.712,
-        "decay": 0.714,
-        "rolling": 0.713
+        "full": 0.776,
+        "decay": 0.769,
+        "rolling": 0.768
       },
       {
         "cutoff": 2019,
         "test_window": "2020-2021",
-        "full": 0.688,
-        "decay": 0.69,
-        "rolling": 0.689
+        "full": 0.803,
+        "decay": 0.818,
+        "rolling": 0.811
       },
       {
         "cutoff": 2020,
         "test_window": "2021-2022",
-        "full": 0.633,
-        "decay": 0.63,
-        "rolling": 0.628
+        "full": 0.713,
+        "decay": 0.713,
+        "rolling": 0.712
       }
     ]
   },
