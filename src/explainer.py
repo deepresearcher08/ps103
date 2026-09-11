@@ -21,20 +21,33 @@ MODEL_NAME = os.environ.get("MOSPI_LLM_MODEL", "llama3.1:8b")
 
 _ollama_last_checked: float = 0.0
 _ollama_available_cache: bool = False
+_resolved_model: str = MODEL_NAME
 
 
 def _ollama_available() -> bool:
-    global _ollama_available_cache, _ollama_last_checked
+    global _ollama_available_cache, _ollama_last_checked, _resolved_model
     import time
     now = time.time()
     # Cache result for 60 seconds so repeated calls don't block
+    if (now - _ollama_last_checked) < 60.0 and _ollama_available_cache:
+        return True
     if (now - _ollama_last_checked) < 60.0:
         return _ollama_available_cache
     try:
         req = urllib.request.Request(f"{OLLAMA_URL}/api/tags")
         with urllib.request.urlopen(req, timeout=3.0) as r:
-            json.loads(r.read().decode())
-        _ollama_available_cache = True
+            data = json.loads(r.read().decode())
+        names = [m.get("name", "") for m in data.get("models", [])]
+        if MODEL_NAME in names:
+            _resolved_model = MODEL_NAME
+            _ollama_available_cache = True
+        elif names:
+            # prefer any llama3.x model, else the first available one
+            _resolved_model = next((n for n in names if "llama3" in n.lower()), names[0])
+            _ollama_available_cache = True
+        else:
+            _resolved_model = MODEL_NAME
+            _ollama_available_cache = False
     except Exception:
         _ollama_available_cache = False
     _ollama_last_checked = now
@@ -153,7 +166,7 @@ def _ollama(messages: list[dict], tools: Optional[list] = None, timeout: int = 6
     """Call Ollama chat. Returns text content when no tools; when tools are given,
     returns the full response dict (so tool_calls can be read). None on any failure."""
     try:
-        body: dict = {"model": MODEL_NAME, "messages": messages,
+        body: dict = {"model": _resolved_model, "messages": messages,
                       "stream": False, "options": {"temperature": 0.2}}
         if tools:
             body["tools"] = tools
