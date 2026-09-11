@@ -19,20 +19,25 @@ from typing import Optional
 OLLAMA_URL = os.environ.get("MOSPI_OLLAMA_URL", "http://localhost:11434")
 MODEL_NAME = os.environ.get("MOSPI_LLM_MODEL", "llama3.1:8b")
 
-_ollama_available_cache: bool | None = None
+_ollama_last_checked: float = 0.0
+_ollama_available_cache: bool = False
 
 
 def _ollama_available() -> bool:
-    global _ollama_available_cache
-    if _ollama_available_cache is not None:
+    global _ollama_available_cache, _ollama_last_checked
+    import time
+    now = time.time()
+    # Cache result for 60 seconds so repeated calls don't block
+    if (now - _ollama_last_checked) < 60.0:
         return _ollama_available_cache
     try:
         req = urllib.request.Request(f"{OLLAMA_URL}/api/tags")
-        with urllib.request.urlopen(req, timeout=0.15) as r:
+        with urllib.request.urlopen(req, timeout=3.0) as r:
             json.loads(r.read().decode())
         _ollama_available_cache = True
     except Exception:
         _ollama_available_cache = False
+    _ollama_last_checked = now
     return _ollama_available_cache
 
 
@@ -152,6 +157,7 @@ def _ollama(messages: list[dict], tools: Optional[list] = None, timeout: int = 6
                       "stream": False, "options": {"temperature": 0.2}}
         if tools:
             body["tools"] = tools
+            body["format"] = "json"
         req = urllib.request.Request(
             f"{OLLAMA_URL}/api/chat", data=json.dumps(body).encode(),
             headers={"Content-Type": "application/json"})

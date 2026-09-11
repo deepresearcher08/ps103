@@ -104,35 +104,59 @@ TOOLS = [
 
 # ---------------- query tools (executed against real data) ----------------
 def tool_search(ctx, args):
-    kw = str(args.get("keyword", "")).lower()
-    field = args.get("field", "project_name")
+    kw = str(args.get("keyword", "")).strip().lower()
     view = ctx["view"]
-    col = "project_name" if field == "project_name" else "sector"
-    mask = view[col].astype(str).str.lower().str.contains(kw, na=False)
+    name_mask = view["project_name"].astype(str).str.lower().str.contains(kw, na=False)
+    sec_mask = view["sector"].astype(str).str.lower().str.contains(kw, na=False)
+
+    # Keyword to MoSPI sector synonyms
+    if kw in ("airport", "airports", "aviation", "flight", "terminal"):
+        sec_mask = sec_mask | view["sector"].astype(str).str.lower().str.contains("civil aviation", na=False)
+    elif kw in ("rail", "railway", "railways", "train", "bullet train", "metro"):
+        sec_mask = sec_mask | view["sector"].astype(str).str.lower().str.contains("railways", na=False)
+    elif kw in ("road", "highway", "highways", "nhai", "expressway"):
+        sec_mask = sec_mask | view["sector"].astype(str).str.lower().str.contains("road", na=False)
+    elif kw in ("power", "electricity", "energy", "thermal", "hydro", "solar"):
+        sec_mask = sec_mask | view["sector"].astype(str).str.lower().str.contains("power", na=False)
+    elif kw in ("coal", "mining", "mine", "mines"):
+        sec_mask = sec_mask | view["sector"].astype(str).str.lower().str.contains("coal", na=False)
+    elif kw in ("petroleum", "oil", "gas", "refinery", "pipeline"):
+        sec_mask = sec_mask | view["sector"].astype(str).str.lower().str.contains("petroleum", na=False)
+
+    mask = name_mask | sec_mask
     sub = view[mask]
-    if args.get("list"):
-        limit = min(int(args.get("limit") or 10), 50)
-        df = sub[["project_name", "sector", "cost_risk", "delay_risk", "cost_overrun_pct"]]\
-            .head(limit)
-        return (f"{len(sub)} project(s) match '{kw}'.", df)
-    return (f"There are **{len(sub)}** projects matching '{kw}' in {field}.", None)
+    limit = min(int(args.get("limit") or 10), 50)
+    df = sub[["project_name", "sector", "cost_risk", "delay_risk", "cost_overrun_pct"]].head(limit)
+    return (f"Found {len(sub)} projects matching '{kw}'.", df if len(sub) > 0 else None)
 
 
 def tool_sector(ctx, args):
     view = ctx["view"]
-    s = args.get("sector", "ALL")
-    if s.upper() == "ALL":
+    s = str(args.get("sector", "ALL")).strip()
+    if s.upper() in ("ALL", "EVERY", "PORTFOLIO", ""):
         df = view.groupby("sector").agg(
             n=("project_name", "count"), mean_cost_risk=("cost_risk", "mean"),
             mean_delay_risk=("delay_risk", "mean"),
-            mean_overrun=("cost_overrun_pct", "mean")).sort_values("n", ascending=False)
-        return ("Sector-wise summary:", df)
-    sub = view[view["sector"].str.lower() == s.lower()]
-    if sub.empty:
-        return (f"No sector named '{s}'.", None)
-    return (f"Sector **{s}** has {len(sub)} projects; mean cost risk "
-            f"{sub['cost_risk'].mean():.2f}, mean delay risk {sub['delay_risk'].mean():.2f}, "
-            f"mean overrun {sub['cost_overrun_pct'].mean():.1f}%.", None)
+            mean_overrun=("cost_overrun_pct", "mean")).sort_values("mean_overrun", ascending=False)
+        return ("Sector-wise summary ranked by mean cost overrun:", df)
+    match = view[view["sector"].astype(str).str.lower().str.contains(s.lower(), na=False)]
+    if match.empty:
+        syns = {
+            "airport": "CIVIL AVIATION", "aviation": "CIVIL AVIATION",
+            "train": "RAILWAYS", "rail": "RAILWAYS",
+            "highway": "ROAD TRANSPORT AND HIGHWAYS", "road": "ROAD TRANSPORT AND HIGHWAYS",
+            "oil": "PETROLEUM", "gas": "PETROLEUM",
+        }
+        for k, v in syns.items():
+            if k in s.lower():
+                match = view[view["sector"].astype(str).str.upper() == v]
+                s = v
+                break
+    if match.empty:
+        return (f"No sector named '{s}'. Available sectors: {', '.join(view['sector'].unique()[:6])}", None)
+    return (f"Sector **{s}** has {len(match)} projects; mean cost risk "
+            f"{match['cost_risk'].mean():.2f}, mean delay risk {match['delay_risk'].mean():.2f}, "
+            f"mean overrun {match['cost_overrun_pct'].mean():.1f}%.", match.head(10))
 
 
 def tool_top(ctx, args):
@@ -254,8 +278,21 @@ def _llm_choose_tool(q: str):
             name = fn.get("name")
             args = fn.get("arguments")
             if isinstance(args, str):
-                args = json.loads(args)
+                try:
+                    args = json.loads(args)
+                except Exception:
+                    args = {}
             return name, args or {}
+        content = (out.get("message") or {}).get("content")
+        if isinstance(content, str):
+            m = re.search(r"\{.*\}", content, re.S)
+            if m:
+                try:
+                    d = json.loads(m.group(0))
+                    return d["name"], d.get("arguments", {})
+                except Exception:
+                    pass
+        return None
     try:
         body = re.search(r"\{.*\}", out, re.S)
         if body:
@@ -366,6 +403,20 @@ def _find_project_in(q: str, view: pd.DataFrame):
     return None
 
 
+def _phrase(q: str, engine_text: str, table) -> str:
+    """Ask the LLM to turn an engine answer into natural prose when it's live."""
+    if not _ollama_available():
+        return engine_text
+    payload = engine_text
+    if table is not None:
+        payload += "\n" + table.head(10).to_string()
+    prose = _ollama([{"role": "system", "content": SYSTEM},
+                     {"role": "user", "content":
+                      f"The data assistant produced this answer from real project data:\n{payload}\n"
+                      f"Answer the user's question concisely, as MoSPI's analyst (2-3 sentences): {q}"}])
+    return (prose.strip() + f"\n\n*Source: live project data*") if prose else engine_text
+
+
 def answer(q: str, ctx: dict) -> tuple[str, pd.DataFrame | None]:
     """Return (markdown_text, optional_table). Tries the LLM agent, falls back to engine."""
     choice = _llm_choose_tool(q)
@@ -379,7 +430,7 @@ def answer(q: str, ctx: dict) -> tuple[str, pd.DataFrame | None]:
                               f"The data result is:\n{text}\n{table.head(10).to_string()}\n"
                               f"Answer the user's original question concisely: {q}"}])
             if prose:
-                text = prose
+                text = f"{prose.strip()}\n\n*Source: live project data*"
         # robustness: if the LLM picked a tool that clearly failed (wrong project /
         # sector / count), re-answer with the deterministic engine so the chat never
         # returns a dead end.
@@ -388,7 +439,8 @@ def answer(q: str, ctx: dict) -> tuple[str, pd.DataFrame | None]:
             text = f"{text}\n\n---\n*Engine fallback:*\n{fb_text}"
             table = fb_table
         return text, table
-    return _fallback(q, ctx)
+    engine_text, table = _fallback(q, ctx)
+    return _phrase(q, engine_text, table), table
 
 
 def _looks_like_failure(text: str) -> bool:
