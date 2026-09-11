@@ -368,6 +368,21 @@ def _fallback(q, ctx):
         return tool_sector(ctx, {"sector": "ALL"})
     if re.search(r"(overall|portfolio|summary|total|status)", ql):
         return tool_overview(ctx, {})
+    # catch-all: any remaining question naming a sector/keyword ("give me airport
+    # projects", "airport type projects", "railway works") -> list matching projects,
+    # so the chat never dead-ends into the help text while data exists.
+    kw = _find_keyword(ql)
+    if kw:
+        view = ctx["view"]
+        mask = ((view["project_name"].astype(str).str.lower().str.contains(kw, na=False)) |
+                (view["sector"].astype(str).str.lower().str.contains(kw, na=False)))
+        n = int(mask.sum())
+        if n == 0:
+            return (f"Found **0** projects matching '{kw}'. Try 'airport', 'railway', "
+                    "'coal', 'power', 'port', 'metro', 'road', 'petroleum'.", None)
+        df = view[mask][["project_name", "sector", "cost_risk",
+                         "delay_risk", "cost_overrun_pct"]].head(15)
+        return (f"**{n}** project(s) matching '{kw}'. Showing up to 15:", df)
     return ("I can answer questions like: 'How many airport-related projects?', "
             "'List airport projects', 'Top 10 at-risk projects', 'Railways sector summary', "
             "'Overall portfolio status', or 'Tell me about <project name>'.", None)
