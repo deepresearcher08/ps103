@@ -253,7 +253,10 @@ def _dispatch(name, args, ctx):
     fn = TOOL_DISPATCH.get(name)
     if fn is None:
         return "Unknown tool.", None
-    return fn(ctx, args)
+    try:
+        return fn(ctx, args)
+    except Exception as exc:  # never bubble pandas/dataframe errors to the UI
+        return exc, None
 
 
 # ---------------- LLM tool-calling path ----------------
@@ -264,6 +267,8 @@ def _llm_choose_tool(q: str):
     user = ("You are a data assistant. Given the question, respond ONLY with a JSON object: "
             '{"name": "<tool>", "arguments": {...}} choosing from: '
             "search_projects, sector_stats, top_risk_projects, rank_projects, project_detail, portfolio_overview. "
+            'If the question is NOT a data question (general questions, "what does this app do", '
+            'greetings, opinions), respond with {"name": "none", "arguments": {}}. '
             f'Question: "{q}"')
     out = _ollama([{"role": "system", "content": SYSTEM},
                    {"role": "user", "content": user}], tools=TOOLS)
@@ -428,22 +433,107 @@ def _phrase(q: str, engine_text: str, table) -> str:
     prose = _ollama([{"role": "system", "content": SYSTEM},
                      {"role": "user", "content":
                       f"The data assistant produced this answer from real project data:\n{payload}\n"
-                      f"Answer the user's question concisely, as MoSPI's analyst (2-3 sentences): {q}"}])
+                      f"Answer the user's question in plain, simple English, no jargon (2-3 sentences): {q}"}])
     return (prose.strip() + f"\n\n*Source: live project data*") if prose else engine_text
 
 
+# ---------------- smalltalk: let the chatbot be human ----------------
+def _is_smalltalk(q: str) -> bool:
+    """True for greetings / thanks / bye / help that should NOT hit the data tools."""
+    ql = " ".join(str(q).lower().split())
+    words = re.sub(r"[^a-z0-9 ]+", " ", ql).split()
+    if not words:
+        return False
+    greet = (words[0] in ("hi", "hii", "hello", "helloo", "hey", "heyy", "yo",
+                          "hola", "namaste", "hai") and len(words) <= 4)
+    exact = " ".join(words) in (
+        "thanks", "thank you", "thanku", "thx", "thanks a lot", "bye", "goodbye",
+        "see you", "ok", "okay", "great", "nice", "done", "good morning",
+        "good afternoon", "good evening", "good night", "who are you", "help")
+    help_ = ("what can you do" in ql or "what do you do" in ql or
+             "features" in ql or "capabil" in ql)
+    return greet or exact or help_
+
+
+def _smalltalk_reply(q: str) -> str | None:
+    """Chat-style reply for smalltalk. Lets the LLM speak freely (no tools); falls
+    back to a friendly canned line if the model is offline."""
+    if not _is_smalltalk(q):
+        return None
+    if _ollama_available():
+        reply = _ollama([
+            {"role": "system",
+             "content": "You are PS103, a friendly chatbot for the MoSPI infrastructure "
+                        "project risk dashboard. Chat naturally and warmly, keep replies to "
+                        "1-3 short sentences. Never mention tools, JSON, models or internal "
+                        "mechanics — stay human."},
+            {"role": "user", "content": q},
+        ])
+        if reply and reply.strip():
+            return reply.strip()
+    ql = " ".join(str(q).lower().split())
+    if "thank" in ql or "thx" in ql:
+        return "You're welcome! Ask me anything about the projects — risks, overruns, sectors."
+    if "bye" in ql or "goodbye" in ql or ql == "see you":
+        return "Goodbye! I'll be here whenever you need another project check."
+    if ("what can you do" in ql or "what do you do" in ql or "features" in ql or
+            "capabil" in ql or ql == "help"):
+        return ("I read the real MoSPI project data, so I can answer things like: "
+                "\"which sector has the highest cost overrun\", \"how many airport "
+                "projects are at risk\", \"top 10 at-risk projects\", or \"tell me "
+                "about a specific project\".")
+    return ("Hi! I'm PS103, your assistant for the MoSPI infrastructure dashboard. "
+            "Ask me about project risks, cost overruns, or any sector — I'll dig into "
+            "the live data for you.")
+
+
+def _chatty_answer(q: str) -> str:
+    """Direct conversational answer from the LLM when the question is not about the data."""
+    if _ollama_available():
+        reply = _ollama([
+            {"role": "system",
+             "content": ("You are PS103, the assistant inside the MoSPI infrastructure "
+                         "project risk dashboard. This dashboard monitors ongoing Indian "
+                         "infrastructure projects from government data — railways, roads, "
+                         "airports, power, coal and more — and flags which projects risk "
+                         "cost overruns or delays, using AI risk scores. If the user asks a "
+                         "general question, answer warmly and clearly in 2-4 sentences, "
+                         "explain what the dashboard does, and suggest example questions. "
+                         "No jargon, no tools, no internals.")},
+            {"role": "user", "content": q},
+        ])
+        if reply and reply.strip():
+            return reply.strip()
+    return (f"I'm PS103, the assistant for the MoSPI infrastructure project risk "
+            f"dashboard — it monitors ongoing infrastructure projects across India and "
+            f"flags which ones risk cost overruns or delays. Ask me about project risks, "
+            f"cost overruns, or a sector, and I'll look it up in the live data for you.")
+
+
 def answer(q: str, ctx: dict) -> tuple[str, pd.DataFrame | None]:
-    """Return (markdown_text, optional_table). Tries the LLM agent, falls back to engine."""
+    """Return (markdown_text, optional_table). Smalltalk goes straight to the chatbot;
+    otherwise the LLM agent picks a tool, falling back to the deterministic engine."""
+    smalltalk = _smalltalk_reply(q)
+    if smalltalk:
+        return smalltalk, None
     choice = _llm_choose_tool(q)
     if choice:
         name, args = choice
+        if name == "none":
+            return _chatty_answer(q), None
         text, table = _dispatch(name, args, ctx)
+        # any tool crash must never surface as a raw exception in the chat UI
+        if isinstance(text, Exception):
+            text, table = _fallback(q, ctx)
+        elif not isinstance(text, str):
+            text = "I couldn't build an answer for that — the data query returned something unexpected."
+            table = None
         # let the LLM phrase a final answer in prose when possible
         if table is not None and _ollama_available():
             prose = _ollama([{"role": "system", "content": SYSTEM},
                              {"role": "user", "content":
                               f"The data result is:\n{text}\n{table.head(10).to_string()}\n"
-                              f"Answer the user's original question concisely: {q}"}])
+                              f"Answer the user's original question in plain, simple English, no jargon: {q}"}])
             if prose:
                 text = f"{prose.strip()}\n\n*Source: live project data*"
         # robustness: if the LLM picked a tool that clearly failed (wrong project /
@@ -451,10 +541,14 @@ def answer(q: str, ctx: dict) -> tuple[str, pd.DataFrame | None]:
         # returns a dead end.
         if _looks_like_failure(text):
             fb_text, fb_table = _fallback(q, ctx)
+            if fb_table is None and _ollama_available() and fb_text.startswith("I can answer questions like"):
+                return _chatty_answer(q), None
             text = f"{text}\n\n---\n*Engine fallback:*\n{fb_text}"
             table = fb_table
         return text, table
     engine_text, table = _fallback(q, ctx)
+    if table is None and engine_text.startswith("I can answer questions like"):
+        return _chatty_answer(q), None
     return _phrase(q, engine_text, table), table
 
 

@@ -27,7 +27,7 @@ import plotly.express as px
 import streamlit as st
 from plotly import graph_objects as go
 
-from src.assistant import answer, build_assistant_view
+from src.assistant import _fallback, answer, build_assistant_view
 from src.explainer import MODEL_NAME, OLLAMA_URL, enrich
 from src.ingest import ingest_and_retrain
 from src.predict import predict_project
@@ -78,8 +78,8 @@ st.markdown("""
   [data-testid="stHorizontalContainer"] {gap: 0 !important; padding: 0 !important;}
 
   /* ---- base typography (Noto Sans, official government typeface) ---- */
-  html, body, .stApp, .stMarkdown, p, span, div, td, th, label, input, select, textarea {
-    font-family: 'Noto Sans', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+  html, body, [class*="css"] {
+    font-family: 'Noto Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
     color: #0f172a;
   }
 
@@ -102,13 +102,6 @@ st.markdown("""
     transition: color .2s;
   }
   .gov-utility a:hover { color: #fff; }
-  .gov-utility .skip-link {
-    position: absolute; left: -9999px;
-  }
-  .gov-utility .skip-link:focus {
-    position: static; left: auto;
-    background: #FF9933; color: #0a1628; padding: 2px 10px; font-weight: 600;
-  }
 
   /* ---- main header (emblem + ministry title) ---- */
   .gov-header {
@@ -152,11 +145,6 @@ st.markdown("""
     color: #c8ddf2;
     font-weight: 400;
   }
-  .gov-title-block .hindi {
-    font-size: 12px;
-    color: #a8c8e8;
-    margin-top: 2px;
-  }
   .gov-logo-right {
     display: flex;
     flex-direction: column;
@@ -177,42 +165,6 @@ st.markdown("""
     height: 4px;
     width: 100%;
     background: linear-gradient(90deg, #FF9933 0% 33.33%, #FFFFFF 33.33% 66.66%, #138808 66.66% 100%);
-  }
-
-  /* ---- Government Navigation Bar (interactive Streamlit buttons styled as official tabs) ---- */
-  div[data-testid="stHorizontalBlock"]:has(button[key^="nav_btn_"]) {
-    background: #0b2545 !important;
-    padding: 3px 28px 0px 28px !important;
-    border-bottom: 2px solid #1e3a6f !important;
-    gap: 6px !important;
-  }
-  div[data-testid="stHorizontalBlock"]:has(button[key^="nav_btn_"]) button[kind="primary"] {
-    background-color: #1e3a6f !important;
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    font-size: 13px !important;
-    border: none !important;
-    border-bottom: 3px solid #FF9933 !important;
-    border-radius: 0px !important;
-    box-shadow: none !important;
-    padding: 8px 12px !important;
-  }
-  div[data-testid="stHorizontalBlock"]:has(button[key^="nav_btn_"]) button[kind="secondary"] {
-    background-color: #0b2545 !important;
-    color: #c8ddf2 !important;
-    font-weight: 500 !important;
-    font-size: 13px !important;
-    border: none !important;
-    border-bottom: 3px solid transparent !important;
-    border-radius: 0px !important;
-    box-shadow: none !important;
-    padding: 8px 12px !important;
-    transition: all 0.15s ease !important;
-  }
-  div[data-testid="stHorizontalBlock"]:has(button[key^="nav_btn_"]) button[kind="secondary"]:hover {
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    color: #ffffff !important;
-    border-bottom: 3px solid #9fc2e6 !important;
   }
 
   /* ---- official breadcrumb bar ---- */
@@ -564,34 +516,40 @@ def render_header():
 def render_navbar(current_page: str) -> str:
     """Render modern, interactive GIGW Portal Navigation bar."""
     PAGES_NAV = [
+        ("Home", "Home"),
         ("Dashboard", "Dashboard"),
         ("Geospatial Map", "India Map"),
         ("Project Explorer", "Projects"),
         ("AI Assistant", "AI Assistant"),
         ("Data & Retrain", "Data & Retrain"),
-        ("Home", "Home"),
     ]
     page_keys = [k for k, _ in PAGES_NAV]
     page_labels = {k: lbl for k, lbl in PAGES_NAV}
 
     if current_page not in page_keys:
-        current_page = "Dashboard"
+        current_page = "Home"
+
+    # Sync pills widget state with current_page
+    if "portal_nav_pills" not in st.session_state or st.session_state["portal_nav_pills"] not in page_keys:
+        st.session_state["portal_nav_pills"] = current_page
 
     chosen_pill = st.pills(
         "Portal Navigation",
         options=page_keys,
-        default=current_page,
         format_func=lambda k: page_labels.get(k, k),
         label_visibility="collapsed",
         key="portal_nav_pills",
     )
 
-    if chosen_pill and chosen_pill != current_page:
+    if chosen_pill:
         st.session_state["page"] = chosen_pill
-        st.query_params["page"] = chosen_pill
-        st.rerun()
-
-    return st.session_state.get("page", current_page)
+        if st.query_params.get("page") != chosen_pill:
+            st.query_params["page"] = chosen_pill
+        return chosen_pill
+    else:
+        # Prevent deselecting: if user clicked active pill to uncheck, restore current_page
+        st.session_state["portal_nav_pills"] = current_page
+        return current_page
 
 
 def render_subbar(current_page: str):
@@ -644,10 +602,15 @@ def load_time():
     return pd.read_csv(TIME)
 
 
+ENRICHED_CSV = ROOT / "data" / "real_enriched_view.csv"
+
+
 @st.cache_data
 def build_view():
-    """Build enriched project view DataFrame — called with NO args so Streamlit
-    never has to hash a 1876-row DataFrame on every render. Cached once per session."""
+    """Load pre-enriched project view DataFrame instantly (0.01s). Cached once per session."""
+    if ENRICHED_CSV.exists():
+        return pd.read_csv(ENRICHED_CSV)
+
     from src.explainer import enrich as _enrich
     time_df = pd.read_csv(TIME)
     rows = []
@@ -670,7 +633,12 @@ def build_view():
             "approval_year": e.get("approval_year"),
             "reasons": e.get("reasons"),
         })
-    return pd.DataFrame(rows)
+    df = pd.DataFrame(rows)
+    try:
+        df.to_csv(ENRICHED_CSV, index=False)
+    except Exception:
+        pass
+    return df
 
 
 @st.cache_data
@@ -776,21 +744,21 @@ def load_borders_3d():
 from src.explainer import _ollama_available as _ollama_avail
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=300)
 def _ollama_available():
-    """Fast non-blocking check if local Ollama daemon is reachable."""
-    if _ollama_avail():
-        try:
-            import urllib.request as _urllib
-            req = _urllib.Request(f"{OLLAMA_URL}/api/tags")
-            with _urllib.urlopen(req, timeout=0.15) as r:
-                models = json.loads(r.read().decode()).get("models", [])
-            if not models:
-                return f"{MODEL_NAME} (no model pulled)"
-            return f"{MODEL_NAME} · {' · '.join(m['name'] for m in models[:2])}"
-        except Exception:
-            return None
-    return None
+    """Cached check if local Ollama daemon is reachable. ttl=300s to avoid blocking renders."""
+    if not _ollama_avail():
+        return None
+    try:
+        import urllib.request as _urllib
+        req = _urllib.Request(f"{OLLAMA_URL}/api/tags")
+        with _urllib.urlopen(req, timeout=2.0) as r:
+            models = json.loads(r.read().decode()).get("models", [])
+        if not models:
+            return f"{MODEL_NAME} (no model pulled)"
+        return f"{MODEL_NAME} · {' · '.join(m['name'] for m in models[:2])}"
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -989,43 +957,15 @@ def page_dashboard():
             viz_type = st.selectbox(
                 "Chart Type",
                 [
-                    "Cost Risk vs Delay Risk (Bubble Chart)",
                     "Top Sectors by Budget Overrun (₹ Cr)",
                     "Average Delay by Sector (Months)",
                     "Cost Overrun % Distribution",
+                    "Cost Risk vs Delay Risk (Bubble Chart)",
                 ],
                 index=0
             )
 
-        if "Bubble" in viz_type:
-            fig = px.scatter(
-                filtered.head(400) if n_filt > 400 else filtered,
-                x="cost_risk", y="delay_risk",
-                size="original_cost_cr",
-                color="sector",
-                hover_name="project_name",
-                hover_data={
-                    "cost_overrun_pct": ":.1f",
-                    "tor_months": True,
-                    "original_cost_cr": ":,.1f",
-                },
-                labels={
-                    "cost_risk": "Cost Risk Index (0 - 1)",
-                    "delay_risk": "Delay Risk Index (0 - 1)",
-                    "original_cost_cr": "Sanctioned ₹ Cr",
-                    "sector": "Sector"
-                },
-                title=f"Cost Risk vs Delay Risk ({min(n_filt, 400)} projects plotted)",
-            )
-            fig.update_layout(
-                height=480,
-                margin=dict(l=20, r=20, t=40, b=20),
-                legend=dict(orientation="h", y=-0.2),
-                paper_bgcolor="rgba(0,0,0,0)"
-            )
-            st.plotly_chart(fig, use_container_width=True, key="viz_scatter")
-
-        elif "Budget Overrun" in viz_type:
+        if "Budget Overrun" in viz_type:
             sec_grp = filtered.groupby("sector").agg(
                 n_proj=("project_name", "count"),
                 tot_orig=("original_cost_cr", "sum"),
@@ -1045,6 +985,38 @@ def page_dashboard():
             )
             fig.update_layout(height=450, margin=dict(l=20, r=20, t=40, b=20), paper_bgcolor="rgba(0,0,0,0)")
             st.plotly_chart(fig, use_container_width=True, key="viz_exposure")
+
+        elif "Bubble" in viz_type:
+            plot_df = (filtered.head(150) if n_filt > 150 else filtered).copy()
+            if len(plot_df):
+                plot_df["bubble_size"] = np.clip(np.sqrt(plot_df["original_cost_cr"].fillna(150)), 6, 22)
+            fig = px.scatter(
+                plot_df,
+                x="cost_risk", y="delay_risk",
+                size="bubble_size",
+                size_max=22,
+                color="sector",
+                hover_name="project_name",
+                hover_data={
+                    "cost_overrun_pct": ":.1f",
+                    "tor_months": True,
+                    "original_cost_cr": ":,.1f",
+                },
+                labels={
+                    "cost_risk": "Cost Risk Index (0 - 1)",
+                    "delay_risk": "Delay Risk Index (0 - 1)",
+                    "original_cost_cr": "Sanctioned ₹ Cr",
+                    "sector": "Sector"
+                },
+                title=f"Cost Risk vs Delay Risk ({len(plot_df)} projects plotted)",
+            )
+            fig.update_layout(
+                height=480,
+                margin=dict(l=20, r=20, t=40, b=20),
+                legend=dict(orientation="h", y=-0.2),
+                paper_bgcolor="rgba(0,0,0,0)"
+            )
+            st.plotly_chart(fig, use_container_width=True, key="viz_scatter")
 
         elif "Average Delay" in viz_type:
             sec_delay = filtered.groupby("sector").agg(
@@ -1482,13 +1454,15 @@ def page_map():
         map_view_mode = st.radio(
             "Map View",
             ["3D Map", "2D Choropleth"],
-            horizontal=True
+            horizontal=True,
+            key="map_view_mode_radio",
         )
     with ctrl2:
         metric = st.radio(
             "Colour By",
             ["cost_overrun_pct", "delay_risk", "n_projects"],
             horizontal=True,
+            key="map_metric_radio",
             format_func=lambda m: {
                 "cost_overrun_pct": "Cost Overrun (%)",
                 "delay_risk": "Delay (Months)",
@@ -1498,30 +1472,36 @@ def page_map():
 
     selected = None
 
-    if "3D" in map_view_mode:
+    if map_view_mode == "3D Map":
+        # Read all 3D settings BEFORE rendering so sliders don't cause double renders
         with st.expander("3D Map Settings", expanded=False):
             c_p1, c_p2, c_p3 = st.columns(3)
             with c_p1:
-                pitch_val = st.slider("Camera Angle", min_value=20, max_value=70, value=45, step=5)
+                pitch_val = st.slider("Camera Angle", min_value=20, max_value=70, value=45, step=5,
+                                      key="map_pitch_slider")
             with c_p2:
-                elev_scale = st.slider("Pillar Height", min_value=0.5, max_value=3.0, value=1.0, step=0.25)
+                elev_scale = st.slider("Pillar Height", min_value=0.5, max_value=3.0, value=1.0, step=0.25,
+                                       key="map_elev_slider")
             with c_p3:
                 map_style_opt = st.selectbox(
                     "Theme",
-                    ["NIC Official Light (Carto Positron)", "Command Center Dark (Dark Matter)", "Road Voyager (High Contrast)"]
+                    ["NIC Official Light (Carto Positron)", "Command Center Dark (Dark Matter)", "Road Voyager (High Contrast)"],
+                    key="map_theme_select",
                 )
             perf_col1, perf_col2 = st.columns(2)
             with perf_col1:
                 show_arcs_opt = st.checkbox(
                     "Show connection arcs (Delhi HQ → States)",
                     value=False,
+                    key="map_arcs_check",
                     help="Arcs from Central HQ to state capitals"
                 )
             with perf_col2:
                 show_borders_opt = st.checkbox(
                     "Show state borders",
                     value=True,
-                    help="State boundary outlines on ground plane (adds load time)"
+                    key="map_borders_check",
+                    help="State boundary outlines on ground plane"
                 )
 
         render_3d_india_map(df, metric, pitch_val, elev_scale, map_style_opt, show_arcs_opt, show_borders_opt)
@@ -1539,14 +1519,9 @@ def page_map():
             unselected=dict(marker=dict(opacity=0.6))))
         fig.update_geos(fitbounds="locations", visible=False)
         fig.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=520, paper_bgcolor="rgba(0,0,0,0)")
-        ev = st.plotly_chart(fig, use_container_width=True, on_select="rerun", key="map_2d")
-
-        try:
-            pts = ev["selection"]["points"]
-            if pts:
-                selected = pts[0].get("location")
-        except Exception:
-            selected = None
+        # on_select="rerun" removed — it caused a rerun on every map click/hover
+        st.plotly_chart(fig, use_container_width=True, key="map_2d")
+        selected = None  # click-to-drill-down via selectbox below
 
     # State Selector Drill-down for both 3D and 2D views
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
@@ -1780,8 +1755,12 @@ def page_assistant():
     st.caption("Ask about the portfolio, sectors, top risks, budgets, or any single project. "
                "Powered by tool-using LLM agent over real MoSPI data.")
     view = build_view()
-    time = load_time()
-    ctx = build_assistant_view(view, time)
+    time_df = load_time()
+
+    # Cache assistant context in session state — rebuilding on every chat message wastes time
+    if "assistant_ctx" not in st.session_state:
+        st.session_state["assistant_ctx"] = build_assistant_view(view, time_df)
+    ctx = st.session_state["assistant_ctx"]
 
     if "history" not in st.session_state:
         _reset_history()
@@ -1790,7 +1769,7 @@ def page_assistant():
     with header[1]:
         if st.button("New conversation", use_container_width=True):
             st.session_state.history = []
-            st.rerun()
+            st.session_state["assistant_ctx"] = build_assistant_view(view, time_df)
     with header[0]:
         st.caption(f"{st.session_state.history and 'Active conversation' or 'New'} — "
                    f"{len(st.session_state.history)//2} exchange(s)")
@@ -1805,10 +1784,18 @@ def page_assistant():
             st.markdown(q)
         with st.chat_message("assistant"):
             with st.spinner("Querying project records..."):
-                text, table = answer(q, ctx)
+                try:
+                    text, table = answer(q, ctx)
+                except Exception:
+                    fb_text, fb_table = _fallback(q, ctx)
+                    text = f"Sorry — something went wrong mid-query. Let me re-answer from the records:\n\n{fb_text}"
+                    table = fb_table
             st.markdown(text)
             if table is not None:
-                st.dataframe(table, use_container_width=True)
+                try:
+                    st.dataframe(table, use_container_width=True)
+                except Exception:
+                    st.markdown(table.to_string())
             st.session_state.history.append({"role": "assistant", "content": text})
 
 
@@ -2101,11 +2088,10 @@ def main():
         "Data & Retrain": page_data,
     }
 
-    # Navigation state handling (supports URL query params + session state)
-    if "page" in st.query_params and st.query_params["page"] in pages:
-        st.session_state["page"] = st.query_params["page"]
-    elif "page" not in st.session_state:
-        st.session_state["page"] = "Dashboard"
+    # Navigation state: only read query_params on the very first load (page not yet set)
+    if "page" not in st.session_state:
+        qp = st.query_params.get("page", "Home")
+        st.session_state["page"] = qp if qp in pages else "Home"
 
     # Render GIGW 3.0 Government Portal Header
     render_header()
